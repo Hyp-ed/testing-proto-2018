@@ -16,11 +16,10 @@
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
-*/
+ */
 
 #ifndef BEAGLEBONE_BLACK_UTILS_IO_GPIO_HPP_
 #define BEAGLEBONE_BLACK_UTILS_IO_GPIO_HPP_
-
 
 #include <cstdint>
 #include <vector>
@@ -35,20 +34,17 @@ namespace io {
 
 namespace gpio {
 constexpr uint8_t kBankNum = 4;
-enum Direction {
-  kIn   = 0,
-  kOut  = 1
-};
-}   // namespace gpio
+enum Direction { kIn = 0, kOut = 1 };
+} // namespace gpio
 
 class GPIO {
- public:
+public:
   GPIO(uint32_t pin, gpio::Direction direction);
-  GPIO(uint32_t pin, gpio::Direction direction, Logger& log);
+  GPIO(uint32_t pin, gpio::Direction direction, Logger &log);
 
-  void    set();     // set high
-  void    clear();   // set low
-  uint8_t read();    // read pin value
+  void set();     // set high
+  void clear();   // set low
+  uint8_t read(); // read pin value
 
   /**
    * @brief Block caller until value of gpio pin has changed
@@ -56,7 +52,7 @@ class GPIO {
    */
   int8_t wait();
 
- private:
+private:
   GPIO() = delete;
 
   // GPIO system configuration
@@ -67,7 +63,7 @@ class GPIO {
   static void initialise();
   static void uninitialise();
   static bool initialised_;
-  static void* base_mapping_[gpio::kBankNum];
+  static void *base_mapping_[gpio::kBankNum];
   static std::vector<uint32_t> exported_pins;
 
   /**
@@ -85,19 +81,21 @@ class GPIO {
    */
   void setupWait();
 
-  uint32_t        pin_;
+  uint32_t pin_;
   gpio::Direction direction_;
-  Logger&         log_;
+  Logger &log_;
 
-  volatile uint32_t* set_;        // set register
-  volatile uint32_t* clear_;      // clear register
-  volatile uint32_t* data_;       // data register
-  uint32_t           pin_mask_;   // mask for register access to this pin
-  int                fd_;         // file pointer to /sys/class/gpio/gpioXX/value
+  volatile uint32_t *set_;   // set register
+  volatile uint32_t *clear_; // clear register
+  volatile uint32_t *data_;  // data register
+  uint32_t pin_mask_;        // mask for register access to this pin
+  int fd_;                   // file pointer to /sys/class/gpio/gpioXX/value
 
   NO_COPY_ASSIGN(GPIO);
 };
 
-}}}   // namespace hyped::utils::io
+} // namespace io
+} // namespace utils
+} // namespace hyped
 
-#endif  // BEAGLEBONE_BLACK_UTILS_IO_GPIO_HPP_
+#endif // BEAGLEBONE_BLACK_UTILS_IO_GPIO_HPP_

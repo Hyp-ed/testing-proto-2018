@@ -35,6 +35,7 @@ enum Event {
   kVelocityZeroReached
 };
 
-}}   // namespace hyped::state_machine
+}
+} // namespace hyped
 
-#endif  // BEAGLEBONE_BLACK_STATE_MACHINE_EVENT_HPP_
+#endif // BEAGLEBONE_BLACK_STATE_MACHINE_EVENT_HPP_

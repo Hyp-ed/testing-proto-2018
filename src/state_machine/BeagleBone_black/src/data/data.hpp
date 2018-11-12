@@ -5,15 +5,17 @@
  * for holding data produced by each of the sub-teams.
  *
  *    Copyright 2018 HYPED
- *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- *    except in compliance with the License. You may obtain a copy of the License at
+ *    Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software distributed under
- *    the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- *    either express or implied. See the License for the specific language governing permissions and
- *    limitations under the License.
+ *    Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 #ifndef BEAGLEBONE_BLACK_DATA_DATA_HPP_
@@ -23,8 +25,8 @@
 #include <cstdint>
 
 #include "data/data_point.hpp"
-#include "utils/math/vector.hpp"
 #include "utils/concurrent/lock.hpp"
+#include "utils/math/vector.hpp"
 
 using std::array;
 
@@ -40,16 +42,16 @@ namespace data {
 // Global Module States
 // -------------------------------------------------------------------------------------------------
 enum class ModuleStatus {
-  kStart,   // Initial module state
+  kStart, // Initial module state
   kInit,  // SM transistions to Calibrating if all modules have Init status.
-  kReady,  // SM transistions to Ready if Motors and Navigation have the Ready status.
-  kCriticalFailure  // SM transitions to EmergencyBraking/FailureStopped
+  kReady, // SM transistions to Ready if Motors and Navigation have the Ready
+          // status.
+  kCriticalFailure // SM transitions to EmergencyBraking/FailureStopped
 };
 
 struct Module {
   ModuleStatus module_status = ModuleStatus::kStart;
 };
-
 
 // -------------------------------------------------------------------------------------------------
 // State Machine States
@@ -69,7 +71,7 @@ enum State {
   num_states
 };
 
-extern const char* states[num_states];
+extern const char *states[num_states];
 
 struct StateMachine {
   bool critical_failure;
@@ -81,11 +83,12 @@ struct StateMachine {
 // -------------------------------------------------------------------------------------------------
 typedef float NavigationType;
 struct Navigation : public Module {
-  NavigationType  distance;
-  NavigationType  velocity;
-  NavigationType  acceleration;
-  NavigationType  emergency_braking_distance;
-  NavigationType  braking_distance = 750;  // TODO(Brano): Remove default,publish the actual dist.
+  NavigationType distance;
+  NavigationType velocity;
+  NavigationType acceleration;
+  NavigationType emergency_braking_distance;
+  NavigationType braking_distance =
+      750; // TODO(Brano): Remove default,publish the actual dist.
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -123,8 +126,8 @@ struct Sensors : public Module {
   DataPoint<array<Proximity, kNumProximities>> proxi_front;
   DataPoint<array<Proximity, kNumProximities>> proxi_back;
 #endif
-  array<StripeCounter, kNumKeyence>  keyence_stripe_counter;   //  l = 0, r = 1
-  array<float, kNumOptEnc> optical_enc_distance;   // l = 0, r =1
+  array<StripeCounter, kNumKeyence> keyence_stripe_counter; //  l = 0, r = 1
+  array<float, kNumOptEnc> optical_enc_distance;            // l = 0, r =1
 };
 
 struct SensorCalibration {
@@ -132,16 +135,17 @@ struct SensorCalibration {
   array<float, Sensors::kNumProximities> proxi_front_variance;
   array<float, Sensors::kNumProximities> proxi_back_variance;
 #endif
-  array<array<NavigationVector, 2>, Sensors::kNumImus> imu_variance;  // x[i][0]=acc, x[i][1]=gyr
+  array<array<NavigationVector, 2>, Sensors::kNumImus>
+      imu_variance; // x[i][0]=acc, x[i][1]=gyr
 };
 
 struct Battery {
-  uint16_t  voltage;      // in 0.1V (deciV)
-  int16_t   current;      // (can be negative) (for LP mA ) (for HP deciA)
-  uint8_t   charge;       // in % (from 0 to 100)
-  int8_t    temperature;  // max temp in C
-  uint16_t  low_voltage_cell;    // in mV
-  uint16_t  high_voltage_cell;   // in mV
+  uint16_t voltage;           // in 0.1V (deciV)
+  int16_t current;            // (can be negative) (for LP mA ) (for HP deciA)
+  uint8_t charge;             // in % (from 0 to 100)
+  int8_t temperature;         // max temp in C
+  uint16_t low_voltage_cell;  // in mV
+  uint16_t high_voltage_cell; // in mV
 };
 
 struct Batteries : public Module {
@@ -153,8 +157,8 @@ struct Batteries : public Module {
 };
 
 struct EmergencyBrakes : public Module {
-  bool front_brakes;       // true if front facing emergency brakes deploy
-  bool rear_brakes;      // true if rear facing emergency brakes deploy
+  bool front_brakes; // true if front facing emergency brakes deploy
+  bool rear_brakes;  // true if rear facing emergency brakes deploy
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -175,7 +179,7 @@ struct Motors : public Module {
 struct Communications : public Module {
   bool launch_command;
   bool reset_command;
-  float run_length;  // in metres
+  float run_length; // in metres
   bool service_propulsion_go;
 };
 
@@ -187,21 +191,22 @@ struct Communications : public Module {
  * threads.
  */
 class Data {
- public:
+public:
   /**
    * @brief      Always returns a reference to the only instance of `Data`.
    */
-  static Data& getInstance();
+  static Data &getInstance();
 
   /**
-   * @brief      Retrieves data related to the state machine. Data has high priority.
+   * @brief      Retrieves data related to the state machine. Data has high
+   * priority.
    */
   StateMachine getStateMachineData();
 
   /**
    * @brief      Should be called by state machine team to update data.
    */
-  void setStateMachineData(const StateMachine& sm_data);
+  void setStateMachineData(const StateMachine &sm_data);
 
   /**
    * @brief      Retrieves data produced by navigation sub-team.
@@ -209,9 +214,10 @@ class Data {
   Navigation getNavigationData();
 
   /**
-   * @brief      Should be called by navigation sub-team whenever they have new data.
+   * @brief      Should be called by navigation sub-team whenever they have new
+   * data.
    */
-  void setNavigationData(const Navigation& nav_data);
+  void setNavigationData(const Navigation &nav_data);
 
   /**
    * @brief      Retrieves data from all sensors
@@ -221,11 +227,11 @@ class Data {
   /**
    * @brief      Should be called to update sensor data.
    */
-  void setSensorsData(const Sensors& sensors_data);
+  void setSensorsData(const Sensors &sensors_data);
   /**
    * @brief      Should be called to update sensor imu data.
    */
-  void setSensorsImuData(const DataPoint<array<Imu, Sensors::kNumImus>>& imu);
+  void setSensorsImuData(const DataPoint<array<Imu, Sensors::kNumImus>> &imu);
   /**
    * @brief       Retrieves only StripeCount part from Sensors data
    */
@@ -247,7 +253,7 @@ class Data {
   /**
    * @brief      Should be called to update battery data
    */
-  void setBatteryData(const Batteries& batteries_data);
+  void setBatteryData(const Batteries &batteries_data);
 
   /**
    * @brief      Retrieves data from the emergency brakes.
@@ -257,7 +263,7 @@ class Data {
   /**
    * @brief      Should be called to update emergency brakes data
    */
-  void setEmergencyBrakesData(const EmergencyBrakes& emergency_brakes_data);
+  void setEmergencyBrakesData(const EmergencyBrakes &emergency_brakes_data);
 
   /**
    * @brief      Retrieves data produced by each of the four motors.
@@ -267,19 +273,20 @@ class Data {
   /**
    * @brief      Should be called to update motor data.
    */
-  void setMotorData(const Motors& motor_data);
+  void setMotorData(const Motors &motor_data);
 
   /**
-   * @brief      Retrieves data on whether stop/kill power commands have been issued.
+   * @brief      Retrieves data on whether stop/kill power commands have been
+   * issued.
    */
   Communications getCommunicationsData();
 
   /**
    * @brief      Should be called to update communications data.
    */
-  void setCommunicationsData(const Communications& communications_data);
+  void setCommunicationsData(const Communications &communications_data);
 
- private:
+private:
   StateMachine state_machine_;
   Navigation navigation_;
   Sensors sensors_;
@@ -288,7 +295,6 @@ class Data {
   Communications communications_;
   SensorCalibration calibration_data_;
   EmergencyBrakes emergency_brakes_;
-
 
   // locks for data substructures
   Lock lock_state_machine_;
@@ -302,6 +308,7 @@ class Data {
   Lock lock_calibration_data_;
 };
 
-}}  // namespace data::hyped
+} // namespace data
+} // namespace hyped
 
-#endif  // BEAGLEBONE_BLACK_DATA_DATA_HPP_
+#endif // BEAGLEBONE_BLACK_DATA_DATA_HPP_

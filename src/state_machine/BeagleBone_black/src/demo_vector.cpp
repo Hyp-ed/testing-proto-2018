@@ -19,36 +19,32 @@
  *    limitations under the License.
  */
 
-#include <iostream>
 #include "utils/math/vector.hpp"
+#include <iostream>
 
 using hyped::utils::math::Vector;
 
-template <typename T,  int N>
-void print(Vector<T,  N> &v)
-{
+template <typename T, int N> void print(Vector<T, N> &v) {
   for (int i = 0; i < N; i++)
     std::cout << v[i] << '\t';
   std::cout << '\n';
 }
 
-int main()
-{
+int main() {
   Vector<int, 10> vector1;
   Vector<int, 10> vector2;
   Vector<int, 10> vector3;
   Vector<double, 10> vector4;
   Vector<double, 2> vector5({3, 4});
   Vector<int, 2> vector6(1);
-  Vector<double, 2> vector7(1.0/sqrt(2));
+  Vector<double, 2> vector7(1.0 / sqrt(2));
 
   print(vector1);
   print(vector2);
   print(vector3);
 
   for (int i = 0; i < 10; i++)
-    vector1[i] = i+1,
-      vector4[i] = 1.1;
+    vector1[i] = i + 1, vector4[i] = 1.1;
 
   print(vector4);
 
@@ -70,7 +66,8 @@ int main()
 
   (vector6.norm() == sqrt(2)) ? std::cout << "True\n" : std::cout << "False\n";
 
-  (vector6.toUnitVector() == vector7) ? std::cout << "True\n" : std::cout << "False\n";
+  (vector6.toUnitVector() == vector7) ? std::cout << "True\n"
+                                      : std::cout << "False\n";
 
   print(vector1);
   print(vector2);

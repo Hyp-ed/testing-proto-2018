@@ -38,16 +38,17 @@ using data::DataPoint;
 namespace sensors {
 
 class FakeProxi : public ProxiInterface {
- public:
+public:
   /*
    * @brief    A constructor for the fake proximity class by reading from file
    */
-  FakeProxi(utils::Logger& log, std::string file_path);
+  FakeProxi(utils::Logger &log, std::string file_path);
 
   /*
-   * @brief    A constructor for the fake proximity class by generating random data
+   * @brief    A constructor for the fake proximity class by generating random
+   * data
    */
-  FakeProxi(utils::Logger& log, uint8_t value, float noise, bool operational);
+  FakeProxi(utils::Logger &log, uint8_t value, float noise, bool operational);
 
   /*
    * @brief    A function to check if the proximity sensor is online
@@ -59,15 +60,14 @@ class FakeProxi : public ProxiInterface {
   /*
    * @brief    A function to get the proximity data
    */
-  void getData(Proximity* proxi) override;
+  void getData(Proximity *proxi) override;
 
-
- private:
+private:
   const uint8_t kProxiTimeInterval = 10;
 
   /*
-   * @brief    A function to load data from file to vector. The file format of the input
-   *           file has to be the following for each line
+   * @brief    A function to load data from file to vector. The file format of
+   * the input file has to be the following for each line
    *
    *              timestamp  value  noise
    */
@@ -79,7 +79,8 @@ class FakeProxi : public ProxiInterface {
   uint8_t addNoiseToData(uint8_t value, float noise);
 
   /*
-   * @brief    Checks to see if sufficient time has pass for the sensor to be updated
+   * @brief    Checks to see if sufficient time has pass for the sensor to be
+   * updated
    */
   bool checkTime();
 
@@ -99,10 +100,11 @@ class FakeProxi : public ProxiInterface {
   std::vector<DataPoint<uint8_t>> val_read_;
   std::vector<bool> val_operational_;
   high_resolution_clock::time_point ref_time_;
-  utils::Logger& log_;
+  utils::Logger &log_;
 };
 
-}}  // namespace hyped::sensors
+} // namespace sensors
+} // namespace hyped
 
 #endif
-#endif  // BEAGLEBONE_BLACK_SENSORS_FAKE_PROXI_HPP_
+#endif // BEAGLEBONE_BLACK_SENSORS_FAKE_PROXI_HPP_

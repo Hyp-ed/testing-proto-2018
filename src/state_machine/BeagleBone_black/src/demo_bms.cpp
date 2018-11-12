@@ -18,11 +18,11 @@
  *    limitations under the License.
  */
 
+#include "data/data.hpp"
+#include "sensors/bms.hpp"
+#include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
-#include "utils/concurrent/thread.hpp"
-#include "sensors/bms.hpp"
-#include "data/data.hpp"
 
 using hyped::utils::Logger;
 using hyped::utils::concurrent::Thread;
@@ -30,20 +30,16 @@ using hyped::utils::concurrent::Thread;
 using hyped::data::Battery;
 using hyped::sensors::BMSHP;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   hyped::utils::System::parseArgs(argc, argv);
-  Logger& log = hyped::utils::System::getLogger();
+  Logger &log = hyped::utils::System::getLogger();
   BMSHP bms(1, log);
 
   Battery b;
   while (1) {
     bms.getData(&b);
-    log.INFO("TEST", "volatage: %d, temp: %d, current: %d, charge: %d", 
-      b.voltage,
-      b.temperature,
-      b.current,
-      b.charge);
+    log.INFO("TEST", "volatage: %d, temp: %d, current: %d, charge: %d",
+             b.voltage, b.temperature, b.current, b.charge);
     Thread::sleep(100);
   }
 

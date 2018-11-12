@@ -22,38 +22,36 @@
 #define BEAGLEBONE_BLACK_SENSORS_MPU9250_HPP_
 
 #include "sensors/interface.hpp"
-#include "utils/logger.hpp"
-#include "utils/io/spi.hpp"
 #include "utils/io/gpio.hpp"
-
+#include "utils/io/spi.hpp"
+#include "utils/logger.hpp"
 
 namespace hyped {
 
+using data::NavigationVector;
 using hyped::utils::io::SPI;
 using utils::Logger;
 using utils::io::GPIO;
-using data::NavigationVector;
 
 namespace sensors {
 
 class MPU9250 : public ImuInterface {
- public:
-  MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale = 0x08, uint8_t gyro_scale = 0x00);
+public:
+  MPU9250(Logger &log, uint32_t pin, uint8_t acc_scale = 0x08,
+          uint8_t gyro_scale = 0x00);
   ~MPU9250();
   /*
    *  @brief Returns if the sensor is online
    *
    *  @return true if the sensor is online
    */
-  bool isOnline() override {
-    return whoAmI();
-  }
+  bool isOnline() override { return whoAmI(); }
   /*
    *  @brief Get the IMU data and update the pointer
    */
-  void getData(Imu* imu) override;
+  void getData(Imu *imu) override;
 
- private:
+private:
   /*
    *  @brief Sets the range for the gyroscope
    */
@@ -70,8 +68,8 @@ class MPU9250 : public ImuInterface {
   void writeByte(uint8_t write_reg, uint8_t write_data);
   void readByte(uint8_t read_reg, uint8_t *read_data);
   void readBytes(uint8_t read_reg, uint8_t *read_buff, uint8_t length);
-  SPI& spi_ = SPI::getInstance();
-  Logger& log_;
+  SPI &spi_ = SPI::getInstance();
+  Logger &log_;
   GPIO gpio_;
   uint8_t acc_scale_;
   uint8_t gyro_scale_;
@@ -80,7 +78,7 @@ class MPU9250 : public ImuInterface {
   bool is_online_;
 };
 
-}}  // namespace hyped::sensors
+} // namespace sensors
+} // namespace hyped
 
-
-#endif  // BEAGLEBONE_BLACK_SENSORS_MPU9250_HPP_
+#endif // BEAGLEBONE_BLACK_SENSORS_MPU9250_HPP_

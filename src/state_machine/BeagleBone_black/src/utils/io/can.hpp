@@ -3,13 +3,14 @@
  * Organisation: HYPED
  * Date: 14. March 2018
  * Description:
- * CAN abstracts CANBUS networking. The type implements a Singleton design pattern.
- * CAN_FD is not supported.
+ * CAN abstracts CANBUS networking. The type implements a Singleton design
+ * pattern. CAN_FD is not supported.
  *
  * To the rest of the system CAN messages are described as can::Frame structure.
  * Sending messages is performed directly in the caller's thread.
  * Receiving messages is performed using a dedicated thread. This thread awaits
- * incoming messages and demultiplexes them to matching registered BMS/Motors units.
+ * incoming messages and demultiplexes them to matching registered BMS/Motors
+ * units.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,26 +44,27 @@ namespace can {
 
 struct Frame {
   static constexpr uint32_t kExtendedMask = 0x80000000U;
-  uint32_t  id;
-  bool      extended;
-  uint8_t   len;
-  uint8_t   data[8];
+  uint32_t id;
+  bool extended;
+  uint8_t len;
+  uint8_t data[8];
 };
 
-}   // namespace can
+} // namespace can
 
 class CanProccesor {
- public:
- /**
-  * @brief To be called by CAN receive side. Object processes received CAN
-  * message and updates its local data
-  *
-  * @param message received CAN message to be processed
-  */
-  virtual void processNewData(can::Frame& message) = 0;
+public:
+  /**
+   * @brief To be called by CAN receive side. Object processes received CAN
+   * message and updates its local data
+   *
+   * @param message received CAN message to be processed
+   */
+  virtual void processNewData(can::Frame &message) = 0;
 
   /**
-   * @brief To be called by CAN receive side to find owner of receinve can::Frame
+   * @brief To be called by CAN receive side to find owner of receinve
+   * can::Frame
    *
    * @param id        - of the received can::Frame
    * @param extended  - is the id extended?
@@ -72,16 +74,16 @@ class CanProccesor {
 };
 
 /**
- * Can implements singleton pattern to encapsulate one can interface, namely can0.
- * During object construction, can intereface is mapped onto socket_ member variable.
- * Furthermore, constructor spawns reading thread which waits on incoming can messages.
- * These messages are put into one of consuming queues based on configured id spaces.
- * The reading itself is performed in overriden run() method.
+ * Can implements singleton pattern to encapsulate one can interface, namely
+ * can0. During object construction, can intereface is mapped onto socket_
+ * member variable. Furthermore, constructor spawns reading thread which waits
+ * on incoming can messages. These messages are put into one of consuming queues
+ * based on configured id spaces. The reading itself is performed in overriden
+ * run() method.
  */
 class Can : public concurrent::Thread {
- public:
-  static Can& getInstance()
-  {
+public:
+  static Can &getInstance() {
     static Can can;
     return can;
   }
@@ -92,24 +94,24 @@ class Can : public concurrent::Thread {
    * @param  frame data to be sent
    * @return 1     iff data sent successfully
    */
-  int send(const can::Frame& frame);
+  int send(const can::Frame &frame);
 
   /**
    * @brief Called by any Can-enabled device implementing CanProcessor interface
    */
-  void registerProcessor(CanProccesor* processor);
+  void registerProcessor(CanProccesor *processor);
 
   /**
    * @brief To be called for starting the receive thread
    */
   void start();
 
- private:
+private:
   /**
    * @param  frame output pointer to data to be filled
    * @return 1     iff data received successfully
    */
-  int receive(can::Frame* frame);
+  int receive(can::Frame *frame);
 
   /**
    * @brief Process received message. Check whom does it belong to.
@@ -117,7 +119,7 @@ class Can : public concurrent::Thread {
    *
    * @param frame received CAN message
    */
-  void processNewData(can::Frame* frame);
+  void processNewData(can::Frame *frame);
 
   /**
    * Blocking read and demultiplex messages based on configured id spaces
@@ -127,13 +129,15 @@ class Can : public concurrent::Thread {
   Can();
   ~Can();
 
- private:
-  int   socket_;
-  bool  running_;
-  std::vector<CanProccesor*>  processors_;
-  concurrent::Lock            socket_lock_;
+private:
+  int socket_;
+  bool running_;
+  std::vector<CanProccesor *> processors_;
+  concurrent::Lock socket_lock_;
 };
 
-}}}   // namespace hyped::utils::io
+} // namespace io
+} // namespace utils
+} // namespace hyped
 
-#endif  // BEAGLEBONE_BLACK_UTILS_IO_CAN_HPP_
+#endif // BEAGLEBONE_BLACK_UTILS_IO_CAN_HPP_

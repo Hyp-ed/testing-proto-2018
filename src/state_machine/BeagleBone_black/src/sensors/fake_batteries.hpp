@@ -24,29 +24,28 @@
 #include <string>
 #include <vector>
 
-#include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
+#include "utils/concurrent/thread.hpp"
 
 namespace hyped {
 
-using utils::Logger;
 using data::Data;
+using utils::Logger;
 
 namespace sensors {
 
-
 class FakeBatteries : public BMSInterface {
- public:
-  FakeBatteries(Logger& log, bool is_high_voltage, bool is_nominal);
-  void getData(Battery* battery) override;
+public:
+  FakeBatteries(Logger &log, bool is_high_voltage, bool is_nominal);
+  void getData(Battery *battery) override;
   bool isOnline() override;
 
- private:
+private:
   void init();
   bool checkTime();
 
-  Data& data_;
+  Data &data_;
   bool is_started_;
   bool is_high_voltage_;
   uint64_t ref_time_;
@@ -58,6 +57,7 @@ class FakeBatteries : public BMSInterface {
   uint16_t low_voltage_cell_;
   uint16_t high_voltage_cell_;
 };
-}}    // namespace hyped::sensors
+} // namespace sensors
+} // namespace hyped
 
-#endif  // BEAGLEBONE_BLACK_SENSORS_FAKE_BATTERIES_HPP_
+#endif // BEAGLEBONE_BLACK_SENSORS_FAKE_BATTERIES_HPP_

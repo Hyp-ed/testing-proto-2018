@@ -20,12 +20,12 @@
 
 #include "utils/logger.hpp"
 
-#include <stdio.h>
 #include <stdarg.h>
+#include <stdio.h>
 
 #include <chrono>
-#include <iomanip>
 #include <ctime>
+#include <iomanip>
 
 #include "utils/concurrent/lock.hpp"
 
@@ -38,27 +38,24 @@ using concurrent::ScopedLock;
 namespace {
 Lock logger_lock;
 
-void myPrint(FILE* file, const char* format, va_list args)
-{
+void myPrint(FILE *file, const char *format, va_list args) {
   vfprintf(file, format, args);
   fprintf(file, "\n");
 }
 
 // static auto start_time = std::chrono::high_resolution_clock::now();
 
-void logHead(FILE* file, const char* title, const char* module)
-{
+void logHead(FILE *file, const char *title, const char *module) {
   using namespace std::chrono;
   std::time_t t = std::time(nullptr);
-  tm* tt = localtime(&t);
-  fprintf(file, "%02d:%02d:%02d",
-      tt->tm_hour, tt->tm_min, tt->tm_sec);
+  tm *tt = localtime(&t);
+  fprintf(file, "%02d:%02d:%02d", tt->tm_hour, tt->tm_min, tt->tm_sec);
 
   static const bool print_micro = true;
   if (print_micro) {
     auto now_time = high_resolution_clock::now().time_since_epoch();
-    duration<int, std::milli> time_span = duration_cast<std::chrono::milliseconds>
-          (now_time);
+    duration<int, std::milli> time_span =
+        duration_cast<std::chrono::milliseconds>(now_time);
     fprintf(file, ".%03d ", static_cast<uint16_t>(time_span.count()) % 1000);
   } else {
     fprintf(file, " ");
@@ -66,16 +63,14 @@ void logHead(FILE* file, const char* title, const char* module)
   fprintf(file, "%s[%s]: ", title, module);
 }
 
-}
+} // namespace
 
 Logger::Logger(bool verbose, int8_t debug)
-    : verbose_(verbose),
-      debug_(debug)
-{ /* EMPTY */ }
+    : verbose_(verbose), debug_(debug) { /* EMPTY */
+}
 
-void Logger::ERR(const char* module, const char* format, ...)
-{
-  static FILE* file = stdout;
+void Logger::ERR(const char *module, const char *format, ...) {
+  static FILE *file = stdout;
   ScopedLock L(&logger_lock);
   logHead(file, "ERR", module);
   va_list args;
@@ -84,9 +79,8 @@ void Logger::ERR(const char* module, const char* format, ...)
   va_end(args);
 }
 
-void Logger::INFO(const char* module, const char* format, ...)
-{
-  static FILE* file = stdout;
+void Logger::INFO(const char *module, const char *format, ...) {
+  static FILE *file = stdout;
   if (verbose_) {
     ScopedLock L(&logger_lock);
     logHead(file, "INFO", module);
@@ -97,9 +91,8 @@ void Logger::INFO(const char* module, const char* format, ...)
   }
 }
 
-void Logger::DBG(const char* module, const char* format, ...)
-{
-  static FILE* file = stderr;
+void Logger::DBG(const char *module, const char *format, ...) {
+  static FILE *file = stderr;
   if (debug_ >= 0) {
     ScopedLock L(&logger_lock);
     logHead(file, "DBG0", module);
@@ -110,9 +103,8 @@ void Logger::DBG(const char* module, const char* format, ...)
   }
 }
 
-void Logger::DBG1(const char* module, const char* format, ...)
-{
-  static FILE* file = stderr;
+void Logger::DBG1(const char *module, const char *format, ...) {
+  static FILE *file = stderr;
   if (debug_ >= 1) {
     ScopedLock L(&logger_lock);
     logHead(file, "DBG1", module);
@@ -122,9 +114,8 @@ void Logger::DBG1(const char* module, const char* format, ...)
     va_end(args);
   }
 }
-void Logger::DBG2(const char* module, const char* format, ...)
-{
-  static FILE* file = stderr;
+void Logger::DBG2(const char *module, const char *format, ...) {
+  static FILE *file = stderr;
   if (debug_ >= 2) {
     ScopedLock L(&logger_lock);
     logHead(file, "DBG2", module);
@@ -134,9 +125,8 @@ void Logger::DBG2(const char* module, const char* format, ...)
     va_end(args);
   }
 }
-void Logger::DBG3(const char* module, const char* format, ...)
-{
-  static FILE* file = stderr;
+void Logger::DBG3(const char *module, const char *format, ...) {
+  static FILE *file = stderr;
   if (debug_ >= 3) {
     ScopedLock L(&logger_lock);
     logHead(file, "DBG3", module);
@@ -146,5 +136,5 @@ void Logger::DBG3(const char* module, const char* format, ...)
     va_end(args);
   }
 }
-}}  // namespace hyped::utils
-
+} // namespace utils
+} // namespace hyped

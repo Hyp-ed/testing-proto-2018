@@ -18,51 +18,42 @@
  *    limitations under the License.
  */
 
-
-#include "sensors/mpu9250.hpp"
-#include "utils/logger.hpp"
-#include "utils/system.hpp"
-#include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
+#include "sensors/mpu9250.hpp"
+#include "utils/concurrent/thread.hpp"
+#include "utils/logger.hpp"
+#include "utils/system.hpp"
 
+using hyped::data::Imu;
+using hyped::sensors::ImuInterface;
 using hyped::sensors::MPU9250;
 using hyped::utils::Logger;
 using hyped::utils::concurrent::Thread;
-using hyped::data::Imu;
-using hyped::sensors::ImuInterface;
 
-
-
-
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   hyped::utils::System::parseArgs(argc, argv);
   Logger log(true, 0);
   uint8_t chip_select_[] = {48, 49, 117, 115};
-  ImuInterface*   imu_[hyped::data::Sensors::kNumImus];
+  ImuInterface *imu_[hyped::data::Sensors::kNumImus];
 
   for (int i = 0; i < hyped::data::Sensors::kNumImus; i++) {
-      imu_[i] = new MPU9250(log, chip_select_[i], 0x08, 0x00);
+    imu_[i] = new MPU9250(log, chip_select_[i], 0x08, 0x00);
   }
   log.INFO("TEST-mpu9260", "MPU9250 instance successfully created");
 
   for (int i = 0; i < 100; i++) {
-    for (int j = 0; j < hyped::data::Sensors::kNumImus; j ++) {
-        hyped::data::Imu imu;
-        imu_[j]->getData(&imu);
-        log.DBG("TEST-mpu9250", "accelerometer id: %d,  x: %f m/s^2, y: %f m/s^2, z: %f m/s^2",
-                j,
-                imu.acc[0],
-                imu.acc[1],
-                imu.acc[2]);
-        log.DBG("TEST-mpu9250", "gyroscope id: %d,  x: %f rad/s, y: %f rad/s, z: %f rad/s",
-                j,
-                imu.gyr[0],
-                imu.gyr[1],
-                imu.gyr[2]);
+    for (int j = 0; j < hyped::data::Sensors::kNumImus; j++) {
+      hyped::data::Imu imu;
+      imu_[j]->getData(&imu);
+      log.DBG("TEST-mpu9250",
+              "accelerometer id: %d,  x: %f m/s^2, y: %f m/s^2, z: %f m/s^2", j,
+              imu.acc[0], imu.acc[1], imu.acc[2]);
+      log.DBG("TEST-mpu9250",
+              "gyroscope id: %d,  x: %f rad/s, y: %f rad/s, z: %f rad/s", j,
+              imu.gyr[0], imu.gyr[1], imu.gyr[2]);
     }
     Thread::sleep(500);
   }
- 	return 0;
+  return 0;
 }

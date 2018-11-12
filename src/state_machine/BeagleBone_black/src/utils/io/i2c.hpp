@@ -17,11 +17,10 @@
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
-*/
+ */
 
 #ifndef BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
 #define BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
-
 
 #include <cstdint>
 
@@ -36,8 +35,8 @@ class Logger;
 namespace io {
 
 class I2C {
- public:
-  static I2C& getInstance();
+public:
+  static I2C &getInstance();
 
   /**
    * @brief Get data from sensor.
@@ -46,7 +45,7 @@ class I2C {
    * @param len   - number of BYTES to be read, i.e. size of the read buffer
    * @return true - iff transaction was successful
    */
-  bool read(uint32_t addr, uint8_t* rx, uint16_t len);
+  bool read(uint32_t addr, uint8_t *rx, uint16_t len);
 
   /**
    * @brief Write data to sensor.
@@ -55,7 +54,7 @@ class I2C {
    * @param len   - number of BYTES to be written, i.e. size of the write buffer
    * @return true - iff transaction was successful
    */
-  bool write(uint32_t addr, uint8_t* tx, uint16_t len);
+  bool write(uint32_t addr, uint8_t *tx, uint16_t len);
 
   /**
    * @brief Write 1 BYTE to sensor.
@@ -65,19 +64,21 @@ class I2C {
    */
   bool write(uint32_t addr, uint8_t tx);
 
- private:
-  explicit I2C(Logger& log);
+private:
+  explicit I2C(Logger &log);
   ~I2C();
   void setSensorAddress(uint32_t addr);
 
- private:
-  Logger&   log_;
-  int       fd_;
-  uint32_t  sensor_addr_;
+private:
+  Logger &log_;
+  int fd_;
+  uint32_t sensor_addr_;
 
   NO_COPY_ASSIGN(I2C);
 };
 
-}}}   // namespace hyped::utils::io
+} // namespace io
+} // namespace utils
+} // namespace hyped
 
-#endif  // BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
+#endif // BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_

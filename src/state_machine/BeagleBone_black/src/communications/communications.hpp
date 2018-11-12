@@ -21,16 +21,16 @@
 #ifndef BEAGLEBONE_BLACK_COMMUNICATIONS_COMMUNICATIONS_HPP_
 #define BEAGLEBONE_BLACK_COMMUNICATIONS_COMMUNICATIONS_HPP_
 
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 #include <cstdio>
-#include <string>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <string>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "data/data.hpp"
 #include "utils/logger.hpp"
@@ -42,21 +42,22 @@ using utils::Logger;
 
 namespace communications {
 
-class Communications
-{
- public:
-  explicit Communications(Logger& log, const char* ip, int port_no);
+class Communications {
+public:
+  explicit Communications(Logger &log, const char *ip, int port_no);
   ~Communications();
   /**
    * @brief Sends data to server.
    *
-   * @pararm[in] message which contains with a command code, a value and a newline
+   * @pararm[in] message which contains with a command code, a value and a
+   * newline
    */
   int sendData(std::string message);
   /**
    * @brief Reads run length data from Server
    *
-   * @return float Returns length of track in m. Buffer assumes test track will be < 1250m.
+   * @return float Returns length of track in m. Buffer assumes test track will
+   * be < 1250m.
    */
   int receiveRunLength();
   /**
@@ -72,14 +73,15 @@ class Communications
    */
   bool isConnected();
 
- private:
-  Logger&     log_;
-  data::Data& data_;
+private:
+  Logger &log_;
+  data::Data &data_;
   bool is_connected_;
-  int  sockfd_;
+  int sockfd_;
   char buffer_[256];
 };
 
-}}  //  namespace hyped::communications
+} // namespace communications
+} // namespace hyped
 
-#endif  // BEAGLEBONE_BLACK_COMMUNICATIONS_COMMUNICATIONS_HPP_
+#endif // BEAGLEBONE_BLACK_COMMUNICATIONS_COMMUNICATIONS_HPP_

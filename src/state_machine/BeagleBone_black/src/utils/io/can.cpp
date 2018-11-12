@@ -23,20 +23,20 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <sys/socket.h>
 #include <net/if.h>
+#include <sys/socket.h>
 
 #ifndef WIN
 #include <linux/can.h>
 #else
 #define CAN_MAX_DLEN 8
 struct can_frame {
-  uint32_t can_id;    /* 32 bit CAN_ID + EFF/RTR/ERR flags */
-  uint8_t    can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
-  uint8_t    __pad;   /* padding */
-  uint8_t    __res0;  /* reserved / padding */
-  uint8_t    __res1;  /* reserved / padding */
-  uint8_t    data[CAN_MAX_DLEN] __attribute__((aligned(8)));
+  uint32_t can_id; /* 32 bit CAN_ID + EFF/RTR/ERR flags */
+  uint8_t can_dlc; /* frame payload length in byte (0 .. CAN_MAX_DLEN) */
+  uint8_t __pad;   /* padding */
+  uint8_t __res0;  /* reserved / padding */
+  uint8_t __res1;  /* reserved / padding */
+  uint8_t data[CAN_MAX_DLEN] __attribute__((aligned(8)));
 };
 
 #ifndef PF_CAN
@@ -48,29 +48,29 @@ struct can_frame {
 #define CAN_MTU (sizeof(struct can_frame))
 struct sockaddr_can {
   uint16_t can_family;
-  int      can_ifindex;
+  int can_ifindex;
   union {
-    struct { uint32_t rx_id, tx_id; } tp;
+    struct {
+      uint32_t rx_id, tx_id;
+    } tp;
   } can_addr;
 };
 
-#endif   // CAN
+#endif // CAN
 
 namespace hyped {
 namespace utils {
 namespace io {
 
-Can::Can()
-    : concurrent::Thread(0)
-{
+Can::Can() : concurrent::Thread(0) {
   if ((socket_ = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0) {
     log_.ERR("CAN", "Could not open can socket");
     return;
   }
 
   sockaddr_can addr;
-  addr.can_family   = AF_CAN;
-  addr.can_ifindex  = if_nametoindex("can0");   // ifr.ifr_ifindex;
+  addr.can_family = AF_CAN;
+  addr.can_ifindex = if_nametoindex("can0"); // ifr.ifr_ifindex;
 
   if (addr.can_ifindex == 0) {
     log_.ERR("CAN", "Could not find can0 network interface");
@@ -89,33 +89,32 @@ Can::Can()
   log_.INFO("CAN", "socket successfully created");
 }
 
-Can::~Can()
-{
-  running_ = false;
-}
+Can::~Can() { running_ = false; }
 
-void Can::start()
-{
-  if (running_) return;   // already started
+void Can::start() {
+  if (running_)
+    return; // already started
 
   running_ = true;
   concurrent::Thread::start();
 }
 
-int Can::send(const can::Frame& frame)
-{
-  if (socket_ < 0) return 0;  // early exit if no can device present
+int Can::send(const can::Frame &frame) {
+  if (socket_ < 0)
+    return 0; // early exit if no can device present
 
   can_frame can;
   log_.DBG2("CAN", "trying to send something");
   // checks, id <= ID_MAX, len <= LEN_MAX
   if (frame.len > 8) {
-    log_.ERR("CAN", "trying to send message of more than 8 bytes, bytes: %d", frame.len);
+    log_.ERR("CAN", "trying to send message of more than 8 bytes, bytes: %d",
+             frame.len);
     return 0;
   }
 
-  can.can_id  = frame.id;
-  can.can_id |= frame.extended ? can::Frame::kExtendedMask : 0;  // add extended id flag
+  can.can_id = frame.id;
+  can.can_id |=
+      frame.extended ? can::Frame::kExtendedMask : 0; // add extended id flag
   can.can_dlc = frame.len;
   for (int i = 0; i < frame.len; i++) {
     can.data[i] = frame.data[i];
@@ -129,13 +128,12 @@ int Can::send(const can::Frame& frame)
     }
   }
 
-  log_.DBG1("CAN", "message with id %d sent, extended:%d",
-      frame.id, frame.extended);
+  log_.DBG1("CAN", "message with id %d sent, extended:%d", frame.id,
+            frame.extended);
   return 1;
 }
 
-void Can::run()
-{
+void Can::run() {
   /* these settings are static and can be held out of the hot path */
   can::Frame data;
 
@@ -146,11 +144,11 @@ void Can::run()
   }
   log_.INFO("CAN", "stopped continuous reading");
 
-  if (socket_ >= 0) close(socket_);
+  if (socket_ >= 0)
+    close(socket_);
 }
 
-int Can::receive(can::Frame* frame)
-{
+int Can::receive(can::Frame *frame) {
   size_t nBytes;
   can_frame raw_data;
 
@@ -161,22 +159,21 @@ int Can::receive(can::Frame* frame)
     return 0;
   }
 
-  frame->id       = raw_data.can_id & ~can::Frame::kExtendedMask;
+  frame->id = raw_data.can_id & ~can::Frame::kExtendedMask;
   frame->extended = raw_data.can_id & can::Frame::kExtendedMask;
-  frame->len      = raw_data.can_dlc;
+  frame->len = raw_data.can_dlc;
   for (int i = 0; i < frame->len; i++) {
     frame->data[i] = raw_data.data[i];
   }
-  log_.DBG1("CAN", "received %u %u, extended %d",
-      raw_data.can_id, frame->id, frame->extended);
+  log_.DBG1("CAN", "received %u %u, extended %d", raw_data.can_id, frame->id,
+            frame->extended);
   return 1;
 }
 
-void Can::processNewData(can::Frame* message)
-{
-  CanProccesor* owner = 0;
+void Can::processNewData(can::Frame *message) {
+  CanProccesor *owner = 0;
 
-  for (CanProccesor* processor : processors_) {
+  for (CanProccesor *processor : processors_) {
     if (processor->hasId(message->id, message->extended)) {
       owner = processor;
       break;
@@ -186,13 +183,15 @@ void Can::processNewData(can::Frame* message)
   if (owner) {
     owner->processNewData(*message);
   } else {
-    log_.ERR("CAN", "did not find owner of received CAN message with id %d", message->id);
+    log_.ERR("CAN", "did not find owner of received CAN message with id %d",
+             message->id);
   }
 }
 
-void Can::registerProcessor(CanProccesor* processor)
-{
+void Can::registerProcessor(CanProccesor *processor) {
   processors_.push_back(processor);
 }
 
-}}}   // namespace hyped::utils::io
+} // namespace io
+} // namespace utils
+} // namespace hyped

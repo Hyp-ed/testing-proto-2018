@@ -18,35 +18,30 @@
  *    limitations under the License.
  */
 
-
 #include "sensors/imu_manager.hpp"
 
-#include "sensors/mpu9250.hpp"
 #include "data/data.hpp"
-#include "utils/timer.hpp"
 #include "sensors/fake_imu.hpp"
+#include "sensors/mpu9250.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 
 using data::Data;
+using data::NavigationVector;
 using data::Sensors;
 using utils::System;
-using data::NavigationVector;
 
 namespace sensors {
 
-ImuManager::ImuManager(Logger& log,
-                       ImuManager::DataArray *imu)
-    : ImuManagerInterface(log),
-      sys_(System::getSystem()),
-      sensors_imu_(imu),
-      chip_select_ {48, 49, 115, 117},
-      is_calibrated_(false),
-      calib_counter_(0)
-{
+ImuManager::ImuManager(Logger &log, ImuManager::DataArray *imu)
+    : ImuManagerInterface(log), sys_(System::getSystem()),
+      sensors_imu_(imu), chip_select_{48, 49, 115, 117}, is_calibrated_(false),
+      calib_counter_(0) {
   old_timestamp_ = utils::Timer::getTimeMicros();
 
-  if (sys_.fake_imu || sys_.fake_sensors) is_fake_ = true;
+  if (sys_.fake_imu || sys_.fake_sensors)
+    is_fake_ = true;
 
   if (!is_fake_) {
     // create IMUs
@@ -58,49 +53,49 @@ ImuManager::ImuManager(Logger& log,
   } else {
     if (sys_.fail_acc_imu) {
       for (int i = 0; i < data::Sensors::kNumImus - 1; i++) {
-        imu_[i] = new FakeImu(log,
-                "../BeagleBone_black/data/in/fake_imu_acc_offline_suddenly.txt",
-                "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
-                "../BeagleBone_black/data/in/fake_imu_input_em.txt",
-                "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
+        imu_[i] = new FakeImu(
+            log,
+            "../BeagleBone_black/data/in/fake_imu_acc_offline_suddenly.txt",
+            "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+            "../BeagleBone_black/data/in/fake_imu_input_em.txt",
+            "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
       }
-      imu_[data::Sensors::kNumImus-1] = new FakeImu(log,
-                  "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
-                  "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
-                  "../BeagleBone_black/data/in/fake_imu_input_em.txt",
-                  "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
+      imu_[data::Sensors::kNumImus - 1] =
+          new FakeImu(log, "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
+                      "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+                      "../BeagleBone_black/data/in/fake_imu_input_em.txt",
+                      "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
     } else if (sys_.fail_dec_imu) {
       for (int i = 0; i < data::Sensors::kNumImus - 1; i++) {
-        imu_[i] = new FakeImu(log,
-                "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
-                "../BeagleBone_black/data/in/fake_imu_dec_offline_suddenly.txt",
-                "../BeagleBone_black/data/in/fake_imu_input_em.txt",
-                "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
+        imu_[i] = new FakeImu(
+            log, "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
+            "../BeagleBone_black/data/in/fake_imu_dec_offline_suddenly.txt",
+            "../BeagleBone_black/data/in/fake_imu_input_em.txt",
+            "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
       }
-      imu_[data::Sensors::kNumImus-1] = new FakeImu(log,
-                  "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
-                  "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
-                  "../BeagleBone_black/data/in/fake_imu_input_em.txt",
-                  "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
+      imu_[data::Sensors::kNumImus - 1] =
+          new FakeImu(log, "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
+                      "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+                      "../BeagleBone_black/data/in/fake_imu_input_em.txt",
+                      "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
     } else {
       // Nominal fake IMUs
       for (int i = 0; i < data::Sensors::kNumImus; i++) {
         if (sys_.accurate) {
           imu_[i] = new FakeAccurateImu(log);
         } else {
-          imu_[i] = new FakeImu(log,
-                    "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
-                    "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
-                    "../BeagleBone_black/data/in/fake_imu_input_em.txt",
-                    "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
+          imu_[i] = new FakeImu(
+              log, "../BeagleBone_black/data/in/fake_imu_input_acc.txt",
+              "../BeagleBone_black/data/in/fake_imu_input_dec.txt",
+              "../BeagleBone_black/data/in/fake_imu_input_em.txt",
+              "../BeagleBone_black/data/in/fake_imu_input_gyr.txt");
         }
       }
     }
   }
 }
 
-void ImuManager::run()
-{
+void ImuManager::run() {
   // collect calibration data
   while (!is_calibrated_) {
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
@@ -112,7 +107,8 @@ void ImuManager::run()
       }
     }
     calib_counter_++;
-    if (calib_counter_ >= 100) is_calibrated_ = true;
+    if (calib_counter_ >= 100)
+      is_calibrated_ = true;
   }
   log_.INFO("IMU-MANAGER", "Calibration complete!");
 
@@ -121,13 +117,13 @@ void ImuManager::run()
     for (int i = 0; i < data::Sensors::kNumImus; i++) {
       imu_[i]->getData(&(sensors_imu_->value[i]));
     }
-    if (is_fake_) Thread::sleep(20);
+    if (is_fake_)
+      Thread::sleep(20);
     sensors_imu_->timestamp = utils::Timer::getTimeMicros();
   }
 }
 
-ImuManager::CalibrationArray ImuManager::getCalibrationData()
-{
+ImuManager::CalibrationArray ImuManager::getCalibrationData() {
   while (!is_calibrated_) {
     Thread::yield();
   }
@@ -138,16 +134,13 @@ ImuManager::CalibrationArray ImuManager::getCalibrationData()
   return imu_calibrations_;
 }
 
-bool ImuManager::updated()
-{
+bool ImuManager::updated() {
   if (old_timestamp_ != sensors_imu_->timestamp) {
     return true;
   }
   return false;
 }
 
-void ImuManager::resetTimestamp()
-{
-  old_timestamp_ = sensors_imu_->timestamp;
-}
-}}  // namespace hyped::sensors
+void ImuManager::resetTimestamp() { old_timestamp_ = sensors_imu_->timestamp; }
+} // namespace sensors
+} // namespace hyped

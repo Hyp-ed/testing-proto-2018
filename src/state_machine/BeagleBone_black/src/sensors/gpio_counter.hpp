@@ -39,18 +39,18 @@ using utils::Logger;
 using utils::concurrent::Thread;
 namespace sensors {
 
-
-class GpioCounter: public GpioInterface, public Thread {
- public:
+class GpioCounter : public GpioInterface, public Thread {
+public:
   explicit GpioCounter(int pin);
   data::StripeCounter getStripeCounter() override;
   void run() override;
 
- private:
+private:
   int pin_;
 
   data::StripeCounter stripe_counter_;
 };
-}}  // namespace hyped::sensors
+} // namespace sensors
+} // namespace hyped
 
-#endif  // BEAGLEBONE_BLACK_SENSORS_GPIO_COUNTER_HPP_
+#endif // BEAGLEBONE_BLACK_SENSORS_GPIO_COUNTER_HPP_

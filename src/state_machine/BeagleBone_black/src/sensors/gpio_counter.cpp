@@ -18,14 +18,12 @@
  *    limitations under the License.
  */
 
-#include <stdio.h>
+#include "sensors/gpio_counter.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "utils/io/gpio.hpp"
 #include "utils/system.hpp"
 #include "utils/timer.hpp"
-#include "sensors/gpio_counter.hpp"
-
-
+#include <stdio.h>
 
 namespace hyped {
 
@@ -35,30 +33,25 @@ using utils::io::GPIO;
 
 namespace sensors {
 
-GpioCounter::GpioCounter(int pin)
-     : pin_(pin)
-{}
+GpioCounter::GpioCounter(int pin) : pin_(pin) {}
 
-void GpioCounter::run()
-{
+void GpioCounter::run() {
   GPIO thepin(pin_, utils::io::gpio::kIn);
-  uint8_t val = thepin.wait();  // Ignore first reading
+  uint8_t val = thepin.wait(); // Ignore first reading
   stripe_counter_.count.value = 0;
-  stripe_counter_.count.timestamp =  utils::Timer::getTimeMicros();
+  stripe_counter_.count.timestamp = utils::Timer::getTimeMicros();
 
   while (1) {
     val = thepin.wait();
     if (val == 1) {
-      stripe_counter_.count.value = stripe_counter_.count.value+1;
-      stripe_counter_.count.timestamp =  utils::Timer::getTimeMicros();
+      stripe_counter_.count.value = stripe_counter_.count.value + 1;
+      stripe_counter_.count.timestamp = utils::Timer::getTimeMicros();
       stripe_counter_.operational = true;
     }
   }
 }
 
-StripeCounter GpioCounter::getStripeCounter()
-{
-  return stripe_counter_;
-}
+StripeCounter GpioCounter::getStripeCounter() { return stripe_counter_; }
 
-}}  // namespace hyped::sensors
+} // namespace sensors
+} // namespace hyped

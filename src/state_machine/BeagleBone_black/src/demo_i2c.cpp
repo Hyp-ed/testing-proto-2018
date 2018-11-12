@@ -24,20 +24,19 @@
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
 
-using hyped::utils::io::I2C;
 using hyped::utils::Logger;
+using hyped::utils::io::I2C;
 
 Logger log(true, 1);
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   hyped::utils::System::parseArgs(argc, argv);
-	I2C& i2c = I2C::getInstance();
-	uint8_t tx[] = {0, 0};
-	uint8_t rx[8] = {};
+  I2C &i2c = I2C::getInstance();
+  uint8_t tx[] = {0, 0};
+  uint8_t rx[8] = {};
 
-	i2c.write(0x29, tx, 2);
-	i2c.read(0x29, rx, 8);
-	log.INFO("MAIN", "read %x %x %x %x", rx[0], rx[1], rx[2], rx[3]);
-	return 0;
+  i2c.write(0x29, tx, 2);
+  i2c.read(0x29, rx, 8);
+  log.INFO("MAIN", "read %x %x %x %x", rx[0], rx[1], rx[2], rx[3]);
+  return 0;
 }

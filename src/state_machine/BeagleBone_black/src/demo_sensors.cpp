@@ -19,32 +19,31 @@
  */
 
 #ifndef M_PI
-#define M_PI           3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
 
+#include "communications/main.hpp"
 #include "data/data.hpp"
 #include "sensors/main.hpp"
-#include "communications/main.hpp"
-#include "utils/system.hpp"
 #include "utils/logger.hpp"
+#include "utils/system.hpp"
 using namespace hyped;
-using data::Data;
-using data::Sensors;
 using data::Batteries;
-using data::StripeCounter;
+using data::Data;
 using data::SensorCalibration;
-using utils::System;
+using data::Sensors;
+using data::StripeCounter;
 using utils::Logger;
+using utils::System;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   System::parseArgs(argc, argv);
-  System& sys = System::getSystem();
-  Logger& log = utils::System::getLogger();
-  Data& data = Data::getInstance();
+  System &sys = System::getSystem();
+  Logger &log = utils::System::getLogger();
+  Data &data = Data::getInstance();
 
-  Thread* sensors   = new sensors::Main(2, log);
-  Thread* communications = new communications::Main(4, log);
+  Thread *sensors = new sensors::Main(2, log);
+  Thread *communications = new communications::Main(4, log);
   sensors->start();
   communications->start();
 
@@ -55,72 +54,59 @@ int main(int argc, char* argv[])
     batteries = data.getBatteriesData();
 
     log.INFO("Test", "Low Power Batteries");
-    for (auto& battery : batteries.low_power_batteries) {
-      log.INFO("TEST", "Charge: %u, Temp: %d, Voltage: %u, Current %d", battery.charge,
-                                                                        battery.temperature,
-                                                                        battery.voltage,
-                                                                        battery.current);
+    for (auto &battery : batteries.low_power_batteries) {
+      log.INFO("TEST", "Charge: %u, Temp: %d, Voltage: %u, Current %d",
+               battery.charge, battery.temperature, battery.voltage,
+               battery.current);
     }
 
     std::printf("\n");
     log.INFO("Test", "High Power Batteries");
-    for (auto& battery : batteries.high_power_batteries) {
-      log.INFO("TEST", "Charge: %u, Temp: %d, Voltage: %u, Current %d, Min: %u, Max: %u", battery.charge,
-                                                                        battery.temperature,
-                                                                        battery.voltage,
-                                                                        battery.current,
-                                                                        battery.low_voltage_cell,
-                                                                        battery.high_voltage_cell);
+    for (auto &battery : batteries.high_power_batteries) {
+      log.INFO(
+          "TEST",
+          "Charge: %u, Temp: %d, Voltage: %u, Current %d, Min: %u, Max: %u",
+          battery.charge, battery.temperature, battery.voltage, battery.current,
+          battery.low_voltage_cell, battery.high_voltage_cell);
     }
 
     std::printf("\n");
     auto imus = sens.imu.value;
     log.INFO("Test", "IMUs online: %d,%d,%d,%d", imus[0].operational,
-                                                 imus[1].operational,
-                                                 imus[2].operational,
-                                                 imus[3].operational);
-    for (auto& imu_data : sens.imu.value) {
-      auto& acc = imu_data.acc;
-      auto& gyr = imu_data.gyr;
-      log.INFO("TEST", "Acceleration  (% 2.4f % 2.4f % 2.4f)  Gyroscope  (% 2.4f % 2.4f % 2.4f)",
-        acc[0],
-        acc[1],
-        acc[2],
-        gyr[0],
-        gyr[1],
-        gyr[2]);
+             imus[1].operational, imus[2].operational, imus[3].operational);
+    for (auto &imu_data : sens.imu.value) {
+      auto &acc = imu_data.acc;
+      auto &gyr = imu_data.gyr;
+      log.INFO("TEST",
+               "Acceleration  (% 2.4f % 2.4f % 2.4f)  Gyroscope  (% 2.4f % "
+               "2.4f % 2.4f)",
+               acc[0], acc[1], acc[2], gyr[0], gyr[1], gyr[2]);
     }
 
     std::printf("\n");
     auto proxis_front = sens.proxi_front.value;
-    log.INFO("Test", "Proxi-front online: %d,%d,%d,%d,%d,%d,%d,%d", proxis_front[0].operational,
-                                                             proxis_front[1].operational,
-                                                             proxis_front[2].operational,
-                                                             proxis_front[3].operational,
-                                                             proxis_front[4].operational,
-                                                             proxis_front[5].operational,
-                                                             proxis_front[6].operational,
-                                                             proxis_front[7].operational);
-    for (auto& proxi_data : sens.proxi_front.value) {
+    log.INFO("Test", "Proxi-front online: %d,%d,%d,%d,%d,%d,%d,%d",
+             proxis_front[0].operational, proxis_front[1].operational,
+             proxis_front[2].operational, proxis_front[3].operational,
+             proxis_front[4].operational, proxis_front[5].operational,
+             proxis_front[6].operational, proxis_front[7].operational);
+    for (auto &proxi_data : sens.proxi_front.value) {
       auto proxi = proxi_data.val;
       log.INFO("TEST", "Distance front:  %u", proxi);
     }
 
     std::printf("\n");
     auto proxis_back = sens.proxi_back.value;
-    log.INFO("Test", "Proxi-back online: %d,%d,%d,%d,%d,%d,%d,%d", proxis_back[0].operational,
-                                                             proxis_back[1].operational,
-                                                             proxis_back[2].operational,
-                                                             proxis_back[3].operational,
-                                                             proxis_back[4].operational,
-                                                             proxis_back[5].operational,
-                                                             proxis_back[6].operational,
-                                                             proxis_back[7].operational);
-    for (auto& proxi_data : sens.proxi_back.value) {
+    log.INFO("Test", "Proxi-back online: %d,%d,%d,%d,%d,%d,%d,%d",
+             proxis_back[0].operational, proxis_back[1].operational,
+             proxis_back[2].operational, proxis_back[3].operational,
+             proxis_back[4].operational, proxis_back[5].operational,
+             proxis_back[6].operational, proxis_back[7].operational);
+    for (auto &proxi_data : sens.proxi_back.value) {
       auto proxi = proxi_data.val;
       log.INFO("TEST", "Distance back: %u", proxi);
     }
     Thread::sleep(500);
   }
- 	return 0;
+  return 0;
 }

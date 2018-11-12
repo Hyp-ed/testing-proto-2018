@@ -33,47 +33,49 @@
 namespace hyped {
 
 // namespace utils { namespace io { class Can; }}
-namespace utils { class Logger; }
+namespace utils {
+class Logger;
+}
 
-using utils::io::can::Frame;
-using utils::io::CanProccesor;
 using utils::Logger;
+using utils::io::CanProccesor;
+using utils::io::can::Frame;
 
 namespace sensors {
 
 constexpr uint32_t kNumProximities = data::Sensors::kNumProximities;
 
-
 /**
- * @brief Represents and instance of a proximity sensor connected to SAMC21 board.
- * The values are transfered over CANBUS.
+ * @brief Represents and instance of a proximity sensor connected to SAMC21
+ * board. The values are transfered over CANBUS.
  *
  * Note, all 8 values are transfered as a single CAN message with a single ID.
  * Therefore, only 1 object handles CAN message processing and puts the data to
  * the static data[] variable for all other proximity objects to share.
  */
 class CanProxi : public ProxiInterface, public CanProccesor {
- public:
-  CanProxi(uint8_t id, Logger& log = utils::System::getLogger());
+public:
+  CanProxi(uint8_t id, Logger &log = utils::System::getLogger());
 
   // from ProxiInterface
   bool isOnline() override;
-  void getData(Proximity* proxi) override;
+  void getData(Proximity *proxi) override;
 
   // from CanProcessor
-  void processNewData(Frame& message) override;
+  void processNewData(Frame &message) override;
   bool hasId(uint32_t id, bool extended) override;
   void startRanging() override;
- private:
-  Logger& log_;
+
+private:
+  Logger &log_;
   uint8_t id_;
 
-  static bool    can_registered_;
-  static bool    valid_[kNumProximities];
+  static bool can_registered_;
+  static bool valid_[kNumProximities];
   static uint8_t data_[kNumProximities];
 };
 
-}}  // namespace hyped::sensors
+} // namespace sensors
+} // namespace hyped
 #endif
-#endif  // BEAGLEBONE_BLACK_SENSORS_CAN_PROXI_HPP_
-
+#endif // BEAGLEBONE_BLACK_SENSORS_CAN_PROXI_HPP_

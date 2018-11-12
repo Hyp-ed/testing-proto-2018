@@ -23,60 +23,58 @@
 // #include <iostream>
 #include <stdio.h>
 
-#include "utils/concurrent/thread.hpp"
-#include "utils/concurrent/lock.hpp"
 #include "utils/concurrent/condition_variable.hpp"
+#include "utils/concurrent/lock.hpp"
+#include "utils/concurrent/thread.hpp"
 
-using hyped::utils::concurrent::Thread;
+using hyped::utils::concurrent::ConditionVariable;
 using hyped::utils::concurrent::Lock;
 using hyped::utils::concurrent::ScopedLock;
-using hyped::utils::concurrent::ConditionVariable;
+using hyped::utils::concurrent::Thread;
 
 using hyped::utils::Logger;
 
 ConditionVariable cv;
-Lock              global_lock;
-Lock              lock_;
-Logger            log(true, 1);
+Lock global_lock;
+Lock lock_;
+Logger log(true, 1);
 
 int value = 0;
 
-void delay(uint32_t i)
-{
-  while (i--);
+void delay(uint32_t i) {
+  while (i--)
+    ;
 }
 
-class DemoThread: public Thread {
- public:
+class DemoThread : public Thread {
+public:
   explicit DemoThread(uint8_t id, bool synchronise = false)
-      : Thread(id, log),
-        synchronise_(synchronise)
-  { /* EMPTY */ }
+      : Thread(id, log), synchronise_(synchronise) { /* EMPTY */
+  }
 
-  void run() override
-  {
+  void run() override {
     global_lock.lock();
     cv.wait(&global_lock);
     global_lock.unlock();
 
-    if (synchronise_) lock_.lock();
+    if (synchronise_)
+      lock_.lock();
     int temp = value;
 
     delay(10000);
     value = temp + 1;
-    if (synchronise_) lock_.unlock();
+    if (synchronise_)
+      lock_.unlock();
   }
 
- private:
+private:
   bool synchronise_;
 };
 
-
-int main()
-{
+int main() {
   bool synchronise = false;
-  Thread* t2 = new DemoThread(2, synchronise);
-  Thread* t3 = new DemoThread(3, synchronise);
+  Thread *t2 = new DemoThread(2, synchronise);
+  Thread *t3 = new DemoThread(3, synchronise);
 
   t2->start();
   t3->start();

@@ -29,7 +29,7 @@ namespace hyped {
 namespace utils {
 
 class Timer {
- public:
+public:
   // static uint64_t getTimeMillis();
   static uint64_t getTimeMicros();
 
@@ -42,7 +42,7 @@ class Timer {
   double getMillis() const;
   uint64_t getMicros() const;
 
- private:
+private:
   uint64_t elapsed_;
   uint64_t start_;
   uint64_t stop_;
@@ -51,23 +51,17 @@ class Timer {
 };
 
 class ScopedTimer {
- public:
-  explicit ScopedTimer(Timer* t)
-      : timer_(t)
-  {
-    timer_->start();
-  }
+public:
+  explicit ScopedTimer(Timer *t) : timer_(t) { timer_->start(); }
 
-  ~ScopedTimer()
-  {
-    timer_->stop();
-  }
+  ~ScopedTimer() { timer_->stop(); }
 
- private:
-  Timer* timer_;
+private:
+  Timer *timer_;
   NO_COPY_ASSIGN(ScopedTimer);
 };
 
-}}  // namespace hyped::utils
+} // namespace utils
+} // namespace hyped
 
-#endif  // BEAGLEBONE_BLACK_UTILS_TIMER_HPP_
+#endif // BEAGLEBONE_BLACK_UTILS_TIMER_HPP_

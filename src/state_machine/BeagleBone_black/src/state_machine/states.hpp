@@ -4,9 +4,9 @@
  * Organisation: HYPED
  * Date: 11. February 2018
  * Description:
- * All states of the FSM implement interface defined by class State. The two functions
- * defined by this interface are:
- * entry() - to be called at entering new state
+ * All states of the FSM implement interface defined by class State. The two
+ * functions defined by this interface are: entry() - to be called at entering
+ * new state
  *         - stored the correct enum value of state_ variable
  * react() - changes current state based on event enum
  *
@@ -27,12 +27,12 @@
 #ifndef BEAGLEBONE_BLACK_STATE_MACHINE_STATES_HPP_
 #define BEAGLEBONE_BLACK_STATE_MACHINE_STATES_HPP_
 
-#include "state_machine/event.hpp"
 #include "data/data.hpp"
+#include "state_machine/event.hpp"
 #include "state_machine/hyped-machine.hpp"
+#include "utils/io/gpio.hpp"
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
-#include "utils/io/gpio.hpp"
 
 namespace hyped {
 
@@ -43,77 +43,76 @@ namespace state_machine {
 class HypedMachine;
 
 class State {
- public:
-  State()
-    : state_(data::State::kInvalid) {}
+public:
+  State() : state_(data::State::kInvalid) {}
 
   virtual void react(HypedMachine &machine, Event event) = 0;
   virtual void entry() = 0;
-  data::State   state_;
-  static State* alloc_;   // allocate all states here
+  data::State state_;
+  static State *alloc_; // allocate all states here
 };
 
 class Idle : public State {
- public:
+public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
 };
 
 class Calibrating : public State {
- public:
+public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
 };
 
 class Ready : public State {
- public:
+public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
 };
 
 class Accelerating : public State {
- public:
+public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
 };
 
 class Decelerating : public State {
- public:
+public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
 };
 
 class EmergencyBraking : public State {
- public:
+public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
 };
 
 class RunComplete : public State {
- public:
+public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
 };
 
 class FailureStopped : public State {
- public:
+public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
 };
 
 class Exiting : public State {
- public:
+public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
 };
 
 class Finished : public State {
- public:
+public:
   virtual void react(HypedMachine &machine, Event event) override;
   virtual void entry() override;
 };
 
-}  // namespace state_machine
-}  // namespace hyped
+} // namespace state_machine
+} // namespace hyped
 
-#endif  // BEAGLEBONE_BLACK_STATE_MACHINE_STATES_HPP_
+#endif // BEAGLEBONE_BLACK_STATE_MACHINE_STATES_HPP_

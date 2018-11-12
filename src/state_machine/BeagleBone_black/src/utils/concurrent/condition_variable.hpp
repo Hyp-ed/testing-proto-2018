@@ -21,7 +21,7 @@
 #ifndef BEAGLEBONE_BLACK_UTILS_CONCURRENT_CONDITION_VARIABLE_HPP_
 #define BEAGLEBONE_BLACK_UTILS_CONCURRENT_CONDITION_VARIABLE_HPP_
 
-#define CV  condition_variable_any
+#define CV condition_variable_any
 
 #include <condition_variable>
 
@@ -33,7 +33,7 @@ namespace concurrent {
 class Lock;
 
 class ConditionVariable {
- public:
+public:
   ConditionVariable();
   ~ConditionVariable();
 
@@ -51,15 +51,18 @@ class ConditionVariable {
    * @brief      Block current thread until this CV is signalled/notified.
    *
    * @param      lock  The lock associated with this CV. The lock is unlocked
-   *                   upon calling this method and reacquired just before returning.
-   *                   Note, the lock must be acquired by the caller before calling wait().
+   *                   upon calling this method and reacquired just before
+   * returning. Note, the lock must be acquired by the caller before calling
+   * wait().
    */
-  void wait(Lock* lock);
+  void wait(Lock *lock);
 
- private:
-  std::CV* cond_var_;
+private:
+  std::CV *cond_var_;
 };
 
-}}}   // namespace hyped::utils::concurrent
+} // namespace concurrent
+} // namespace utils
+} // namespace hyped
 
-#endif  // BEAGLEBONE_BLACK_UTILS_CONCURRENT_CONDITION_VARIABLE_HPP_
+#endif // BEAGLEBONE_BLACK_UTILS_CONCURRENT_CONDITION_VARIABLE_HPP_

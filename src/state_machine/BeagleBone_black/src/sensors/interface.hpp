@@ -21,8 +21,8 @@
 #ifndef BEAGLEBONE_BLACK_SENSORS_INTERFACE_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_INTERFACE_HPP_
 
-#include <string>
 #include "data/data.hpp"
+#include <string>
 
 namespace hyped {
 
@@ -36,7 +36,7 @@ using data::NavigationVector;
 namespace sensors {
 
 class SensorInterface {
- public:
+public:
   /**
    * @brief Check if sensor is responding, i.e. connected to the system
    * @return true - if sensor is online
@@ -44,37 +44,37 @@ class SensorInterface {
   virtual bool isOnline() = 0;
 };
 #ifdef PROXI
-class ProxiInterface: public SensorInterface {
- public:
+class ProxiInterface : public SensorInterface {
+public:
   /**
    * @brief Get Proxi data
    * @param proxi - output pointer to be filled by this sensor
    */
-  virtual void getData(Proximity* proxi) = 0;
+  virtual void getData(Proximity *proxi) = 0;
   virtual void startRanging() = 0;
 };
 #endif
 
-class ImuInterface: public SensorInterface {
- public:
+class ImuInterface : public SensorInterface {
+public:
   /**
    * @brief Get IMU data
    * @param imu - output pointer to be filled by this sensor
    */
-  virtual void getData(Imu* imu) = 0;
+  virtual void getData(Imu *imu) = 0;
 };
 
-class BMSInterface: public SensorInterface {
- public:
+class BMSInterface : public SensorInterface {
+public:
   /**
    * @brief Get Battery data
    * @param battery - output pointer to be filled by this sensor
    */
-  virtual void getData(Battery* battery) = 0;
+  virtual void getData(Battery *battery) = 0;
 };
 
 class GpioInterface {
- public:
+public:
   /**
    * @brief Get GPIO data
    * @param
@@ -82,9 +82,7 @@ class GpioInterface {
   virtual data::StripeCounter getStripeCounter() = 0;
 };
 
+} // namespace sensors
+} // namespace hyped
 
-
-}}  // namespace hyped::sensors
-
-
-#endif  // BEAGLEBONE_BLACK_SENSORS_INTERFACE_HPP_
+#endif // BEAGLEBONE_BLACK_SENSORS_INTERFACE_HPP_

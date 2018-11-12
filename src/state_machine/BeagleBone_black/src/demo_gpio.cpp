@@ -1,20 +1,19 @@
 
-#include <stdio.h>
 #include "utils/concurrent/thread.hpp"
 #include "utils/io/gpio.hpp"
 #include "utils/system.hpp"
+#include <stdio.h>
 
+using hyped::utils::System;
 using hyped::utils::concurrent::Thread;
 using hyped::utils::io::GPIO;
-using hyped::utils::System;
 namespace io = hyped::utils::io;
 
-
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
   System::parseArgs(argc, argv);
 
-  GPIO pin_66(66, io::gpio::kOut);  // P8_7
-  GPIO pin_69(69, io::gpio::kIn);   // P8_9
+  GPIO pin_66(66, io::gpio::kOut); // P8_7
+  GPIO pin_69(69, io::gpio::kIn);  // P8_9
 
   for (int i = 0; i < 5; i++) {
     uint8_t val = pin_69.wait();

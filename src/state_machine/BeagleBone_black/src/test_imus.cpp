@@ -18,36 +18,31 @@
  *    limitations under the License.
  */
 
-
+#include "data/data.hpp"
+#include "sensors/fake_imu.hpp"
+#include "sensors/interface.hpp"
 #include "sensors/mpu9250.hpp"
+#include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
-#include "utils/concurrent/thread.hpp"
-#include "data/data.hpp"
-#include "sensors/interface.hpp"
 #include "utils/timer.hpp"
-#include "sensors/interface.hpp"
-#include "sensors/fake_imu.hpp"
 
+using hyped::data::Imu;
+using hyped::sensors::FakeImu;
+using hyped::sensors::ImuInterface;
 using hyped::sensors::MPU9250;
 using hyped::utils::Logger;
 using hyped::utils::concurrent::Thread;
-using hyped::data::Imu;
-using hyped::sensors::ImuInterface;
-using hyped::sensors::FakeImu;
 
-#include <string>
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <string>
 
-
-
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   hyped::utils::System::parseArgs(argc, argv);
   Logger log(true, 0);
   uint8_t chip_select_[] = {48, 49, 117, 115};
-  ImuInterface*   imu_[hyped::data::Sensors::kNumImus];
+  ImuInterface *imu_[hyped::data::Sensors::kNumImus];
   std::ofstream myfile[hyped::data::Sensors::kNumImus];
 
   for (int i = 0; i < hyped::data::Sensors::kNumImus; i++) {
@@ -55,9 +50,9 @@ int main(int argc, char* argv[])
   }
 
   for (int i = 0; i < hyped::data::Sensors::kNumImus; i++) {
-    myfile[i] << "Timestamp µs, acc x, acc y, acc z, gyro x, gyro y, gyro z, operational\n";
+    myfile[i] << "Timestamp µs, acc x, acc y, acc z, gyro x, gyro y, gyro z, "
+                 "operational\n";
   }
-  
 
   for (int i = 0; i < hyped::data::Sensors::kNumImus; i++) {
     imu_[i] = new MPU9250(log, chip_select_[i], 0x08, 0x00);
@@ -66,10 +61,11 @@ int main(int argc, char* argv[])
 
   uint64_t start = hyped::utils::Timer::getTimeMicros();
   while (120000 > (hyped::utils::Timer::getTimeMicros() - start)) {
-    for (int j = 0; j < hyped::data::Sensors::kNumImus; j ++) {
+    for (int j = 0; j < hyped::data::Sensors::kNumImus; j++) {
       hyped::data::Imu imu;
       imu_[j]->getData(&imu);
-      myfile[j] << std::to_string(hyped::utils::Timer::getTimeMicros() - start) << ",";
+      myfile[j] << std::to_string(hyped::utils::Timer::getTimeMicros() - start)
+                << ",";
       myfile[j] << std::to_string(imu.acc[0]) << ",";
       myfile[j] << std::to_string(imu.acc[1]) << ",";
       myfile[j] << std::to_string(imu.acc[2]) << ",";
@@ -77,15 +73,17 @@ int main(int argc, char* argv[])
       myfile[j] << std::to_string(imu.gyr[1]) << ",";
       myfile[j] << std::to_string(imu.gyr[2]) << ",";
       if (imu.operational) {
-        myfile[j] << "true" << "\n";
+        myfile[j] << "true"
+                  << "\n";
       } else {
-        myfile[j] << "false" << "\n";
+        myfile[j] << "false"
+                  << "\n";
       }
-   }
-   Thread::sleep(50);
+    }
+    Thread::sleep(50);
   }
   for (int i = 0; i < hyped::data::Sensors::kNumImus; i++) {
     myfile[i].close();
   }
- 	return 0;
+  return 0;
 }

@@ -18,95 +18,106 @@
  *    limitations under the License.
  */
 
-
-
 #include <cstdint>
 
 #include "state_machine/hyped-machine.hpp"
 #include "state_machine/main.hpp"
 
 #include "data/data.hpp"
-#include "utils/timer.hpp"
 #include "utils/system.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 namespace state_machine {
 
-Main::Main(uint8_t id, Logger& log)
-    : Thread(id, log),
-      hypedMachine(log),
-      timeout_(60000000),     // 60 seconds
-      data_(data::Data::getInstance())
-{ /* EMPTY */ }
+Main::Main(uint8_t id, Logger &log)
+    : Thread(id, log), hypedMachine(log), timeout_(60000000), // 60 seconds
+      data_(data::Data::getInstance()) {                      /* EMPTY */
+}
 
 /**
-  *  @brief  Runs state machine thread.
-  */
+ *  @brief  Runs state machine thread.
+ */
 
-void Main::run()
-{
-  utils::System& sys = utils::System::getSystem();
+void Main::run() {
+  utils::System &sys = utils::System::getSystem();
   while (sys.running_) {
-    comms_data_     = data_.getCommunicationsData();
-    nav_data_       = data_.getNavigationData();
-    sm_data_        = data_.getStateMachineData();
-    motor_data_     = data_.getMotorData();
+    comms_data_ = data_.getCommunicationsData();
+    nav_data_ = data_.getNavigationData();
+    sm_data_ = data_.getStateMachineData();
+    motor_data_ = data_.getMotorData();
     batteries_data_ = data_.getBatteriesData();
     // sensors_data_   = data_.getSensorsData();
 
     switch (sm_data_.current_state) {
-      case data::State::kIdle:
-        if (checkCommsCriticalFailure()) break;   // TODO(anyone): discuss this transition again
-        if (checkInitialised())          break;
+    case data::State::kIdle:
+      if (checkCommsCriticalFailure())
+        break; // TODO(anyone): discuss this transition again
+      if (checkInitialised())
         break;
-      case data::State::kCalibrating:
-        if (checkCriticalFailure())      break;
-        if (checkSystemsChecked())       break;
+      break;
+    case data::State::kCalibrating:
+      if (checkCriticalFailure())
         break;
-      case data::State::kReady:
-        if (checkCriticalFailure())      break;
-        if (checkOnStart())              break;
+      if (checkSystemsChecked())
         break;
-      case data::State::kAccelerating:
-        if (checkCriticalFailure())      break;
-        if (checkTimer())                break;
-        if (checkMaxDistanceReached())   break;
+      break;
+    case data::State::kReady:
+      if (checkCriticalFailure())
         break;
-      case data::State::kDecelerating:
-        if (checkCriticalFailure())      break;
-        if (checkTimer())                break;
-        if (checkVelocityZeroReached())  break;
+      if (checkOnStart())
         break;
-      case data::State::kRunComplete:
-        if (checkCriticalFailure())      break;
-        if (checkOnExit())               break;
+      break;
+    case data::State::kAccelerating:
+      if (checkCriticalFailure())
         break;
-      case data::State::kExiting:
-        if (checkCriticalFailure())      break;
-        if (checkFinish())               break;
+      if (checkTimer())
         break;
-      case data::State::kEmergencyBraking:
-        if (checkVelocityZeroReached())  break;
+      if (checkMaxDistanceReached())
         break;
-      // we cannot recover from these states
-      case data::State::kInvalid:
-        log_.ERR("STATE", "we are in Invalid state");
-      case data::State::kFinished:
-      case data::State::kFailureStopped:
-      default:
+      break;
+    case data::State::kDecelerating:
+      if (checkCriticalFailure())
         break;
+      if (checkTimer())
+        break;
+      if (checkVelocityZeroReached())
+        break;
+      break;
+    case data::State::kRunComplete:
+      if (checkCriticalFailure())
+        break;
+      if (checkOnExit())
+        break;
+      break;
+    case data::State::kExiting:
+      if (checkCriticalFailure())
+        break;
+      if (checkFinish())
+        break;
+      break;
+    case data::State::kEmergencyBraking:
+      if (checkVelocityZeroReached())
+        break;
+      break;
+    // we cannot recover from these states
+    case data::State::kInvalid:
+      log_.ERR("STATE", "we are in Invalid state");
+    case data::State::kFinished:
+    case data::State::kFailureStopped:
+    default:
+      break;
     }
 
     yield();
   }
 }
 
-bool Main::checkInitialised()
-{
+bool Main::checkInitialised() {
   // all modules must be initialised
-  if (comms_data_.module_status     == data::ModuleStatus::kInit &&
-      nav_data_.module_status       == data::ModuleStatus::kInit &&
-      motor_data_.module_status     == data::ModuleStatus::kInit &&
+  if (comms_data_.module_status == data::ModuleStatus::kInit &&
+      nav_data_.module_status == data::ModuleStatus::kInit &&
+      motor_data_.module_status == data::ModuleStatus::kInit &&
       // sensors_data_.module_status   == data::ModuleStatus::kInit &&
       batteries_data_.module_status == data::ModuleStatus::kInit) {
     log_.INFO("STATE", "all modules are initialised");
@@ -116,10 +127,9 @@ bool Main::checkInitialised()
   return false;
 }
 
-bool Main::checkSystemsChecked()
-{
+bool Main::checkSystemsChecked() {
   // nav and motors must be ready
-  if (nav_data_.module_status   == data::ModuleStatus::kReady &&
+  if (nav_data_.module_status == data::ModuleStatus::kReady &&
       motor_data_.module_status == data::ModuleStatus::kReady) {
     log_.INFO("STATE", "systems ready");
     hypedMachine.handleEvent(kSystemsChecked);
@@ -128,8 +138,7 @@ bool Main::checkSystemsChecked()
   return false;
 }
 
-bool Main::checkOnStart()
-{
+bool Main::checkOnStart() {
   if (comms_data_.launch_command) {
     log_.INFO("STATE", "launch command received");
     hypedMachine.handleEvent(kOnStart);
@@ -141,8 +150,7 @@ bool Main::checkOnStart()
   return false;
 }
 
-bool Main::checkCommsCriticalFailure()
-{
+bool Main::checkCommsCriticalFailure() {
   if (comms_data_.module_status == data::ModuleStatus::kCriticalFailure) {
     log_.ERR("STATE", "Critical failure caused by communications ");
     hypedMachine.handleEvent(kCriticalFailure);
@@ -151,8 +159,7 @@ bool Main::checkCommsCriticalFailure()
   return false;
 }
 
-bool Main::checkCriticalFailure()
-{
+bool Main::checkCriticalFailure() {
   // check if any of the module has failed (except sensors)
   if (comms_data_.module_status == data::ModuleStatus::kCriticalFailure) {
     log_.ERR("STATE", "Critical failure caused by communications ");
@@ -176,36 +183,32 @@ bool Main::checkCriticalFailure()
   }
 
   // also check if emergency braking distance has been reached
-  if (nav_data_.distance +
-      nav_data_.emergency_braking_distance +
-      20 >= comms_data_.run_length) {
+  if (nav_data_.distance + nav_data_.emergency_braking_distance + 20 >=
+      comms_data_.run_length) {
     log_.ERR("STATE", "Critical failure, emergency braking distance reached");
-    log_.ERR("STATE", "current distance, emergency distance: %f %f"
-      , nav_data_.distance
-      , comms_data_.run_length - nav_data_.emergency_braking_distance);
+    log_.ERR("STATE", "current distance, emergency distance: %f %f",
+             nav_data_.distance,
+             comms_data_.run_length - nav_data_.emergency_braking_distance);
     hypedMachine.handleEvent(kCriticalFailure);
     return true;
   }
   return false;
 }
 
-bool Main::checkMaxDistanceReached()
-{
-  if (nav_data_.distance +
-      nav_data_.braking_distance +
-      20 >= comms_data_.run_length) {
+bool Main::checkMaxDistanceReached() {
+  if (nav_data_.distance + nav_data_.braking_distance + 20 >=
+      comms_data_.run_length) {
     log_.INFO("STATE", "Max distance reached");
-    log_.INFO("STATE", "current distance, braking distance: %f %f"
-      , nav_data_.distance
-      , comms_data_.run_length - nav_data_.braking_distance);
+    log_.INFO("STATE", "current distance, braking distance: %f %f",
+              nav_data_.distance,
+              comms_data_.run_length - nav_data_.braking_distance);
     hypedMachine.handleEvent(kMaxDistanceReached);
     return true;
   }
   return false;
 }
 
-bool Main::checkOnExit()
-{
+bool Main::checkOnExit() {
   if (comms_data_.service_propulsion_go) {
     log_.INFO("STATE", "initialising service propulsion");
     hypedMachine.handleEvent(kOnExit);
@@ -214,16 +217,14 @@ bool Main::checkOnExit()
   return false;
 }
 
-bool Main::checkFinish()
-{
+bool Main::checkFinish() {
   // no implementation yet
   return false;
 }
 
-bool Main::checkVelocityZeroReached()
-{
-  if (motor_data_.velocity_1 == 0 && motor_data_.velocity_2 == 0
-      && motor_data_.velocity_3 == 0 && motor_data_.velocity_4 == 0) {
+bool Main::checkVelocityZeroReached() {
+  if (motor_data_.velocity_1 == 0 && motor_data_.velocity_2 == 0 &&
+      motor_data_.velocity_3 == 0 && motor_data_.velocity_4 == 0) {
     log_.INFO("STATE", "RPM reached zero.");
     hypedMachine.handleEvent(kVelocityZeroReached);
     return true;
@@ -231,8 +232,7 @@ bool Main::checkVelocityZeroReached()
   return false;
 }
 
-bool Main::checkTimer()
-{
+bool Main::checkTimer() {
   if (utils::Timer::getTimeMicros() > time_start_ + timeout_) {
     log_.ERR("STATE", "Timer expired");
     hypedMachine.handleEvent(kCriticalFailure);
@@ -241,4 +241,5 @@ bool Main::checkTimer()
   return false;
 }
 
-}}  // namespace hyped::state_machine
+} // namespace state_machine
+} // namespace hyped

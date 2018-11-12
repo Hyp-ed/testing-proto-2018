@@ -28,8 +28,7 @@
 using namespace hyped::state_machine;
 using hyped::utils::System;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   System::parseArgs(argc, argv);
   hyped::utils::Logger log(true, 1);
   HypedMachine hypedMachine(log);

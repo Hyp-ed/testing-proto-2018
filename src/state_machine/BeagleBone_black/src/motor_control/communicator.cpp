@@ -3,19 +3,21 @@
  * Organisation: HYPED
  * Date: 5/05/18
  * Description:
- * Abstracts the four controller objects away from the Motor Control Main, updates the data structure
- * and relays data to Main accordingly.
+ * Abstracts the four controller objects away from the Motor Control Main,
+ * updates the data structure and relays data to Main accordingly.
  *
  *    Copyright 2018 HYPED
- *    Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- *    except in compliance with the License. You may obtain a copy of the License at
+ *    Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License. You may obtain a
+ * copy of the License at
  *
  *    http://www.apache.org/licenses/LICENSE-2.0
  *
- *    Unless required by applicable law or agreed to in writing, software distributed under
- *    the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
- *    either express or implied. See the License for the specific language governing permissions and
- *    limitations under the License.
+ *    Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
  */
 
 #include "motor_control/communicator.hpp"
@@ -30,12 +32,9 @@ using utils::System;
 
 namespace motor_control {
 
-Communicator::Communicator(Logger& log)
-  : sys_(System::getSystem()),
-    data_(data::Data::getInstance()),
-    log_(log),
-    critical_failure_(false)
-{
+Communicator::Communicator(Logger &log)
+    : sys_(System::getSystem()), data_(data::Data::getInstance()), log_(log),
+      critical_failure_(false) {
   if (!sys_.fake_motors) {
     controller1_ = new Controller(log, 1);
     controller2_ = new Controller(log, 2);
@@ -55,8 +54,7 @@ Communicator::Communicator(Logger& log)
   }
 }
 
-void Communicator::registerControllers()
-{
+void Communicator::registerControllers() {
   controller1_->registerController();
   controller2_->registerController();
   controller3_->registerController();
@@ -64,8 +62,7 @@ void Communicator::registerControllers()
   log_.INFO("MOTOR", "Controllers registered on CAN bus");
 }
 
-void Communicator::configureControllers()
-{
+void Communicator::configureControllers() {
   controller1_->configure();
   controller2_->configure();
   controller3_->configure();
@@ -83,17 +80,15 @@ void Communicator::configureControllers()
   }
 }
 
-void Communicator::prepareMotors()
-{
+void Communicator::prepareMotors() {
   controller1_->enterOperational();
   controller2_->enterOperational();
   controller3_->enterOperational();
   controller4_->enterOperational();
-  if (controller1_->getControllerState() != kOperationEnabled
-     || controller1_->getControllerState() != kOperationEnabled
-     || controller1_->getControllerState() != kOperationEnabled
-     || controller1_->getControllerState() != kOperationEnabled)
-  {
+  if (controller1_->getControllerState() != kOperationEnabled ||
+      controller1_->getControllerState() != kOperationEnabled ||
+      controller1_->getControllerState() != kOperationEnabled ||
+      controller1_->getControllerState() != kOperationEnabled) {
     critical_failure_ = true;
     log_.ERR("MOTOR", "Motors not operational");
   } else {
@@ -101,16 +96,14 @@ void Communicator::prepareMotors()
   }
 }
 
-void Communicator::enterPreOperational()
-{
+void Communicator::enterPreOperational() {
   controller1_->enterPreOperational();
   controller2_->enterPreOperational();
   controller3_->enterPreOperational();
   controller4_->enterPreOperational();
 }
 
-void Communicator::sendTargetVelocity(int32_t target_velocity)
-{
+void Communicator::sendTargetVelocity(int32_t target_velocity) {
   // TODO(anyone) need to check if this is correct for our set-up of motors
   controller1_->sendTargetVelocity(target_velocity);
   controller2_->sendTargetVelocity(-target_velocity);
@@ -118,8 +111,7 @@ void Communicator::sendTargetVelocity(int32_t target_velocity)
   controller4_->sendTargetVelocity(-target_velocity);
 }
 
-MotorVelocity Communicator::requestActualVelocity()
-{
+MotorVelocity Communicator::requestActualVelocity() {
   controller1_->updateActualVelocity();
   controller2_->updateActualVelocity();
   controller3_->updateActualVelocity();
@@ -129,25 +121,21 @@ MotorVelocity Communicator::requestActualVelocity()
   motor_velocity_.velocity_3 = controller3_->getVelocity();
   motor_velocity_.velocity_4 = -controller4_->getVelocity();
 
-  log_.DBG2("MOTOR", "Actual Velocity: 1: %d, 2: %d, 3: %d, 4: %d"
-    , motor_velocity_.velocity_1
-    , motor_velocity_.velocity_2
-    , motor_velocity_.velocity_3
-    , motor_velocity_.velocity_4);
+  log_.DBG2("MOTOR", "Actual Velocity: 1: %d, 2: %d, 3: %d, 4: %d",
+            motor_velocity_.velocity_1, motor_velocity_.velocity_2,
+            motor_velocity_.velocity_3, motor_velocity_.velocity_4);
 
   return motor_velocity_;
 }
 
-void Communicator::quickStopAll()
-{
+void Communicator::quickStopAll() {
   controller1_->quickStop();
   controller2_->quickStop();
   controller3_->quickStop();
   controller4_->quickStop();
 }
 
-void Communicator::healthCheck()
-{
+void Communicator::healthCheck() {
   controller1_->healthCheck();
   controller2_->healthCheck();
   controller3_->healthCheck();
@@ -162,9 +150,7 @@ void Communicator::healthCheck()
   }
 }
 
-bool Communicator::getFailure()
-{
-  return critical_failure_;
-}
+bool Communicator::getFailure() { return critical_failure_; }
 
-}}  // namespace hyped::motor_control
+} // namespace motor_control
+} // namespace hyped
