@@ -18,25 +18,22 @@
  *    limitations under the License.
  */
 
-
 #include "sensors/bms_manager.hpp"
 
-#include "sensors/bms.hpp"
 #include "data/data.hpp"
-#include "utils/timer.hpp"
+#include "sensors/bms.hpp"
 #include "sensors/fake_batteries.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 namespace sensors {
 
-BmsManager::BmsManager(Logger& log,
-                       BatteriesLP* lp_batteries,
+BmsManager::BmsManager(Logger& log, BatteriesLP* lp_batteries,
                        BatteriesHP* hp_batteries)
     : ManagerInterface(log),
       lp_batteries_(lp_batteries),
       hp_batteries_(hp_batteries),
-      sys_(utils::System::getSystem())
-{
+      sys_(utils::System::getSystem()) {
   old_timestamp_ = utils::Timer::getTimeMicros();
   // create BMS LP
   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
@@ -50,15 +47,15 @@ BmsManager::BmsManager(Logger& log,
   }
   for (int i = 0; i < data::Batteries::kNumHPBatteries; i++) {
     if (sys_.fake_batteries) {
-      bms_[i + data::Batteries::kNumLPBatteries] = new FakeBatteries(log, true, true);
+      bms_[i + data::Batteries::kNumLPBatteries] =
+          new FakeBatteries(log, true, true);
     } else {
       bms_[i + data::Batteries::kNumLPBatteries] = new BMSHP(i, log_);
     }
   }
 }
 
-void BmsManager::run()
-{
+void BmsManager::run() {
   while (1) {
     // keep updating data_ based on values read from sensors
     for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
@@ -67,24 +64,22 @@ void BmsManager::run()
     }
     for (int i = 0; i < data::Batteries::kNumHPBatteries; i++) {
       bms_[i + data::Batteries::kNumLPBatteries]->getData(&(*hp_batteries_)[i]);
-      if (!bms_[i + data::Batteries::kNumLPBatteries]->isOnline()) (*hp_batteries_)[i].voltage = 0;
+      if (!bms_[i + data::Batteries::kNumLPBatteries]->isOnline())
+        (*hp_batteries_)[i].voltage = 0;
     }
     timestamp = utils::Timer::getTimeMicros();
     sleep(100);
   }
 }
 
-bool BmsManager::updated()
-{
+bool BmsManager::updated() {
   if (old_timestamp_ != timestamp) {
     return true;
   }
   return false;
 }
 
-void BmsManager::resetTimestamp()
-{
-  old_timestamp_ = timestamp;
-}
+void BmsManager::resetTimestamp() { old_timestamp_ = timestamp; }
 
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped

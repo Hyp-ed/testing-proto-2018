@@ -44,7 +44,7 @@ class SensorInterface {
   virtual bool isOnline() = 0;
 };
 #ifdef PROXI
-class ProxiInterface: public SensorInterface {
+class ProxiInterface : public SensorInterface {
  public:
   /**
    * @brief Get Proxi data
@@ -55,7 +55,7 @@ class ProxiInterface: public SensorInterface {
 };
 #endif
 
-class ImuInterface: public SensorInterface {
+class ImuInterface : public SensorInterface {
  public:
   /**
    * @brief Get IMU data
@@ -64,7 +64,7 @@ class ImuInterface: public SensorInterface {
   virtual void getData(Imu* imu) = 0;
 };
 
-class BMSInterface: public SensorInterface {
+class BMSInterface : public SensorInterface {
  public:
   /**
    * @brief Get Battery data
@@ -82,9 +82,7 @@ class GpioInterface {
   virtual data::StripeCounter getStripeCounter() = 0;
 };
 
-
-
-}}  // namespace hyped::sensors
-
+}  // namespace sensors
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_SENSORS_INTERFACE_HPP_

@@ -24,35 +24,35 @@
 #include <string>
 #include <vector>
 
-#include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
+#include "utils/concurrent/thread.hpp"
 
 namespace hyped {
 
-using utils::Logger;
 using data::Data;
+using utils::Logger;
 
 namespace sensors {
 
-
-class FakeGpioCounter:public GpioInterface {
+class FakeGpioCounter : public GpioInterface {
  public:
   FakeGpioCounter(Logger& log, bool miss_stripe, bool double_stripe);
   data::StripeCounter getStripeCounter() override;
 
  private:
   bool timeout();
-  Logger&     log_;
-  Data&       data_;
+  Logger& log_;
+  Data& data_;
 
-  uint64_t              ref_time_;
-  uint64_t              timeout_;
-  data::StripeCounter   stripes_;
-  bool                  miss_stripe_;
-  bool                  double_stripe_;
-  bool                  is_accelerating_;
+  uint64_t ref_time_;
+  uint64_t timeout_;
+  data::StripeCounter stripes_;
+  bool miss_stripe_;
+  bool double_stripe_;
+  bool is_accelerating_;
 };
-}}    // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_SENSORS_FAKE_GPIO_COUNTER_HPP_

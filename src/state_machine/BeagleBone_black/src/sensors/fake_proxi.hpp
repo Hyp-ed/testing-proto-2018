@@ -45,7 +45,8 @@ class FakeProxi : public ProxiInterface {
   FakeProxi(utils::Logger& log, std::string file_path);
 
   /*
-   * @brief    A constructor for the fake proximity class by generating random data
+   * @brief    A constructor for the fake proximity class by generating random
+   * data
    */
   FakeProxi(utils::Logger& log, uint8_t value, float noise, bool operational);
 
@@ -61,13 +62,12 @@ class FakeProxi : public ProxiInterface {
    */
   void getData(Proximity* proxi) override;
 
-
  private:
   const uint8_t kProxiTimeInterval = 10;
 
   /*
-   * @brief    A function to load data from file to vector. The file format of the input
-   *           file has to be the following for each line
+   * @brief    A function to load data from file to vector. The file format of
+   * the input file has to be the following for each line
    *
    *              timestamp  value  noise
    */
@@ -79,7 +79,8 @@ class FakeProxi : public ProxiInterface {
   uint8_t addNoiseToData(uint8_t value, float noise);
 
   /*
-   * @brief    Checks to see if sufficient time has pass for the sensor to be updated
+   * @brief    Checks to see if sufficient time has pass for the sensor to be
+   * updated
    */
   bool checkTime();
 
@@ -102,7 +103,8 @@ class FakeProxi : public ProxiInterface {
   utils::Logger& log_;
 };
 
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped
 
 #endif
 #endif  // BEAGLEBONE_BLACK_SENSORS_FAKE_PROXI_HPP_

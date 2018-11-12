@@ -18,17 +18,15 @@
  *    limitations under the License.
  */
 
-
 #include <stdio.h>
 #include "utils/io/gpio.hpp"
-#include "utils/system.hpp"
 #include "utils/logger.hpp"
+#include "utils/system.hpp"
 
-using hyped::utils::io::GPIO;
-using hyped::utils::System;
 using hyped::utils::Logger;
+using hyped::utils::System;
+using hyped::utils::io::GPIO;
 namespace io = hyped::utils::io;
-
 
 int main(int argc, char* argv[]) {
   System::parseArgs(argc, argv);
@@ -40,10 +38,10 @@ int main(int argc, char* argv[]) {
   log.INFO("Opt-En", "Starting optical encoder / keyence");
 
   while (1) {
-      val = the_pin.wait();
-      if (val == 1) {
-        count++;
+    val = the_pin.wait();
+    if (val == 1) {
+      count++;
       log.INFO("Opt-En", "count: %d", count);
-      }
+    }
   }
 }

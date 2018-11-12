@@ -30,26 +30,25 @@
 #include <cstdint>
 // #include <memory>
 
-#include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
-#include "sensors/gpio_counter.hpp"
 #include "sensors/fake_gpio_counter.hpp"
+#include "sensors/gpio_counter.hpp"
 #include "sensors/interface.hpp"
 #include "sensors/manager_interface.hpp"
+#include "utils/concurrent/thread.hpp"
 #include "utils/system.hpp"
-
 
 namespace hyped {
 
-using utils::concurrent::Thread;
 using utils::Logger;
+using utils::concurrent::Thread;
 
 namespace sensors {
 
 class CANProxi;
 class Keyence;
 
-class Main: public Thread {
+class Main : public Thread {
  public:
   Main(uint8_t id, Logger& log);
   void run() override;
@@ -59,30 +58,30 @@ class Main: public Thread {
   // returns true iff all battery values (LP and HP) are in expected ranges
   bool batteriesInRange();
 
-  data::Data&     data_;
+  data::Data& data_;
   utils::System& sys_;
 
   // master data structures
-  data::Sensors   sensors_;
+  data::Sensors sensors_;
   data::Batteries batteries_;
   data::StripeCounter stripe_counter_;
 
-
-  GpioInterface*                         keyence_l_;
-  GpioInterface*                         keyence_r_;
-  std::unique_ptr<ImuManagerInterface>   imu_manager_;
-  #ifdef PROXI
+  GpioInterface* keyence_l_;
+  GpioInterface* keyence_r_;
+  std::unique_ptr<ImuManagerInterface> imu_manager_;
+#ifdef PROXI
   std::unique_ptr<ProxiManagerInterface> proxi_manager_front_;
   std::unique_ptr<ProxiManagerInterface> proxi_manager_back_;
-  #endif
-  std::unique_ptr<ManagerInterface>      battery_manager_;
-  GpioInterface*                         optical_encoder_l_;
-  GpioInterface*                         optical_encoder_r_;
+#endif
+  std::unique_ptr<ManagerInterface> battery_manager_;
+  GpioInterface* optical_encoder_l_;
+  GpioInterface* optical_encoder_r_;
 
   bool sensor_init_;
   bool battery_init_;
 };
 
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_SENSORS_MAIN_HPP_

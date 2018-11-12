@@ -23,12 +23,12 @@
 
 using namespace hyped::communications;
 
-int main()
-{
+int main() {
   const char* ipAddress = "localhost";
   int port_no = 5695;
   hyped::utils::Logger log(true, 1);
-  hyped::communications::Communications base_communicator(log, ipAddress, port_no);
+  hyped::communications::Communications base_communicator(log, ipAddress,
+                                                          port_no);
   base_communicator.sendData("CMD01987654321\n");
 
   return 0;

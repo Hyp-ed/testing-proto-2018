@@ -3,11 +3,12 @@
  * Organisation: HYPED
  * Date: 18. April 2018
  * Description:
- * SPI abstracts the communication interface. The class implements a Singleton design pattern.
+ * SPI abstracts the communication interface. The class implements a Singleton
+ * design pattern.
  *
- * Reads and Writes are blocking, i.e. SPI communication has completed by the time the read()
- * function returns.
- * The operations are not thread-safe. It is assumed only one thread uses SPI, namely IMU manager.
+ * Reads and Writes are blocking, i.e. SPI communication has completed by the
+ * time the read() function returns. The operations are not thread-safe. It is
+ * assumed only one thread uses SPI, namely IMU manager.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +27,6 @@
 #ifndef BEAGLEBONE_BLACK_UTILS_IO_SPI_HPP_
 #define BEAGLEBONE_BLACK_UTILS_IO_SPI_HPP_
 
-
 #include "utils/logger.hpp"
 #include "utils/utils.hpp"
 
@@ -34,21 +34,17 @@ namespace hyped {
 namespace utils {
 namespace io {
 
-
 class SPI {
  public:
   static SPI& getInstance();
 
-  enum class Clock {
-    k1MHz,
-    k4MHz,
-    k20MHz
-  };
+  enum class Clock { k1MHz, k4MHz, k20MHz };
 
   void setClock(Clock clk);
 
   /**
-   * @brief simultaneous write and read. Write and read buffer should have the same length
+   * @brief simultaneous write and read. Write and read buffer should have the
+   * same length
    * @param tx  - pointer to head of write buffer
    * @param rx  - pointer to head of read  buffer
    * @param len - number of BYTES in each buffer
@@ -80,8 +76,8 @@ class SPI {
   NO_COPY_ASSIGN(SPI);
 };
 
-
-}}}   // namespace hyped::utils::io
-
+}  // namespace io
+}  // namespace utils
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_UTILS_IO_SPI_HPP_

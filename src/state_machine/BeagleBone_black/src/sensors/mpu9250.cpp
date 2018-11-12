@@ -24,64 +24,63 @@
 #include "utils/math/statistics.hpp"
 
 // Accelerometer addresses
-constexpr uint8_t kAccelXoutH               = 0x3B;
+constexpr uint8_t kAccelXoutH = 0x3B;
 
-constexpr uint8_t kAccelConfig              = 0x1C;
-constexpr uint8_t kAccelConfig2             = 0x1D;
+constexpr uint8_t kAccelConfig = 0x1C;
+constexpr uint8_t kAccelConfig2 = 0x1D;
 
-constexpr uint8_t  kGyroConfig              = 0x1B;
+constexpr uint8_t kGyroConfig = 0x1B;
 
-constexpr uint8_t kWhoAmIMpu9250            = 0x75;
-constexpr uint8_t kWhoAmIResetValue1        = 0x71;
-constexpr uint8_t kWhoAmIResetValue2        = 0x73;
+constexpr uint8_t kWhoAmIMpu9250 = 0x75;
+constexpr uint8_t kWhoAmIResetValue1 = 0x71;
+constexpr uint8_t kWhoAmIResetValue2 = 0x73;
 
 // Power Management
-constexpr uint8_t kMpuRegPwrMgmt1           = 0x6B;
+constexpr uint8_t kMpuRegPwrMgmt1 = 0x6B;
 
 // Configuration
-constexpr uint8_t kMpuRegConfig             = 0x1A;
+constexpr uint8_t kMpuRegConfig = 0x1A;
 
-constexpr uint8_t kReadFlag                 = 0x80;
+constexpr uint8_t kReadFlag = 0x80;
 
 // Configuration bits mpu9250
-constexpr uint8_t kBitsFs250Dps             = 0x00;
-constexpr uint8_t kBitsFs500Dps             = 0x08;
-constexpr uint8_t kBitsFs1000Dps            = 0x10;
-constexpr uint8_t kBitsFs2000Dps            = 0x18;
-constexpr uint8_t kBitsFs2G                 = 0x00;
-constexpr uint8_t kBitsFs4G                 = 0x08;
-constexpr uint8_t kBitsFs8G                 = 0x10;
-constexpr uint8_t kBitsFs16G                = 0x18;
+constexpr uint8_t kBitsFs250Dps = 0x00;
+constexpr uint8_t kBitsFs500Dps = 0x08;
+constexpr uint8_t kBitsFs1000Dps = 0x10;
+constexpr uint8_t kBitsFs2000Dps = 0x18;
+constexpr uint8_t kBitsFs2G = 0x00;
+constexpr uint8_t kBitsFs4G = 0x08;
+constexpr uint8_t kBitsFs8G = 0x10;
+constexpr uint8_t kBitsFs16G = 0x18;
 
 // Resets the device to defaults
-constexpr uint8_t kBitHReset                = 0x80;
+constexpr uint8_t kBitHReset = 0x80;
 
 namespace hyped {
 
 utils::io::gpio::Direction kDirection = utils::io::gpio::kOut;
+using data::NavigationVector;
 using utils::concurrent::Thread;
 using utils::math::OnlineStatistics;
-using data::NavigationVector;
 
 namespace sensors {
 
-MPU9250::MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale, uint8_t gyro_scale)
+MPU9250::MPU9250(Logger& log, uint32_t pin, uint8_t acc_scale,
+                 uint8_t gyro_scale)
     : log_(log),
-    gpio_(pin, kDirection, log),
-    acc_scale_(acc_scale),
-    gyro_scale_(gyro_scale),
-    is_online_(false)
-{
+      gpio_(pin, kDirection, log),
+      acc_scale_(acc_scale),
+      gyro_scale_(gyro_scale),
+      is_online_(false) {
   init();
   log_.DBG("MPU9250", "Creating IMU sensor");
 }
 
-void MPU9250::init()
-{
+void MPU9250::init() {
   // Set pin high
   gpio_.set();
 
-  writeByte(kMpuRegPwrMgmt1, kBitHReset);   // Reset Device
+  writeByte(kMpuRegPwrMgmt1, kBitHReset);  // Reset Device
   Thread::sleep(200);
   // Test connection
   whoAmI();
@@ -93,8 +92,7 @@ void MPU9250::init()
   log_.INFO("MPU9250", "IMU sensor created. Initialisation complete");
 }
 
-bool MPU9250::whoAmI()
-{
+bool MPU9250::whoAmI() {
   uint8_t data;
   int send_counter;
 
@@ -118,85 +116,65 @@ bool MPU9250::whoAmI()
   return is_online_;
 }
 
-MPU9250::~MPU9250()
-{
-  log_.INFO("MPU9250", "Deconstructing sensor object");
-}
+MPU9250::~MPU9250() { log_.INFO("MPU9250", "Deconstructing sensor object"); }
 
-void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data)
-{
+void MPU9250::writeByte(uint8_t write_reg, uint8_t write_data) {
   // ',' instead of ';' is to inform the compiler not to reorder function calls
-  // chip selects signals must have exact ordering with respect to the spi access
-  select(),
-  spi_.write(write_reg, &write_data, 1),
-  deSelect();
+  // chip selects signals must have exact ordering with respect to the spi
+  // access
+  select(), spi_.write(write_reg, &write_data, 1), deSelect();
 }
 
-void MPU9250::readByte(uint8_t read_reg, uint8_t *read_data)
-{
-  select(),
-  spi_.read(read_reg | kReadFlag, read_data, 1),
-  deSelect();
+void MPU9250::readByte(uint8_t read_reg, uint8_t* read_data) {
+  select(), spi_.read(read_reg | kReadFlag, read_data, 1), deSelect();
 }
 
-void MPU9250::readBytes(uint8_t read_reg, uint8_t *read_data, uint8_t length)
-{
-  select(),
-  spi_.read(read_reg | kReadFlag, read_data, length),
-  deSelect();
+void MPU9250::readBytes(uint8_t read_reg, uint8_t* read_data, uint8_t length) {
+  select(), spi_.read(read_reg | kReadFlag, read_data, length), deSelect();
 }
 
-void MPU9250::select()
-{
-  gpio_.clear();
-}
-void  MPU9250::deSelect()
-{
-  gpio_.set();
-}
+void MPU9250::select() { gpio_.clear(); }
+void MPU9250::deSelect() { gpio_.set(); }
 
-void MPU9250::setGyroScale(int scale)
-{
+void MPU9250::setGyroScale(int scale) {
   writeByte(kGyroConfig, scale);
 
   switch (scale) {
     case kBitsFs250Dps:
       gyro_divider_ = 131;
-    break;
+      break;
     case kBitsFs500Dps:
       gyro_divider_ = 65.5;
       break;
     case kBitsFs1000Dps:
       gyro_divider_ = 32.8;
-    break;
+      break;
     case kBitsFs2000Dps:
       gyro_divider_ = 16.4;
-    break;
+      break;
   }
 }
 
-void MPU9250::setAcclScale(int scale)
-{
+void MPU9250::setAcclScale(int scale) {
   writeByte(kAccelConfig, scale);
 
   switch (scale) {
     case kBitsFs2G:
       acc_divider_ = 16384;
-    break;
+      break;
     case kBitsFs4G:
       acc_divider_ = 8192;
-    break;
+      break;
     case kBitsFs8G:
       acc_divider_ = 4096;
-    break;
+      break;
     case kBitsFs16G:
       acc_divider_ = 2048;
-    break;
+      break;
   }
 }
 
-void MPU9250::getData(Imu* imu)
-{
+void MPU9250::getData(Imu* imu) {
   if (is_online_) {
     log_.DBG3("MPU9250", "Getting IMU data");
     auto& acc = imu->acc;
@@ -210,13 +188,13 @@ void MPU9250::getData(Imu* imu)
 
     readBytes(kAccelXoutH, response, 14);
     for (i = 0; i < 3; i++) {
-      bit_data = ((int16_t) response[i*2] << 8) | response[i*2+1];
+      bit_data = ((int16_t)response[i * 2] << 8) | response[i * 2 + 1];
       data = static_cast<float>(bit_data);
-      accel_data[i] = data/acc_divider_  * 9.80665;
+      accel_data[i] = data / acc_divider_ * 9.80665;
 
-      bit_data = ((int16_t) response[i*2 + 8] << 8) | response[i*2+9];
+      bit_data = ((int16_t)response[i * 2 + 8] << 8) | response[i * 2 + 9];
       data = static_cast<float>(bit_data);
-      gyro_data[i] = data/gyro_divider_;
+      gyro_data[i] = data / gyro_divider_;
     }
     imu->operational = is_online_;
     acc[0] = accel_data[0];
@@ -232,4 +210,5 @@ void MPU9250::getData(Imu* imu)
   }
 }
 
-}}   // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped

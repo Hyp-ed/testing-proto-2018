@@ -3,13 +3,14 @@
  * Organisation: HYPED
  * Date: 14. March 2018
  * Description:
- * CAN abstracts CANBUS networking. The type implements a Singleton design pattern.
- * CAN_FD is not supported.
+ * CAN abstracts CANBUS networking. The type implements a Singleton design
+ * pattern. CAN_FD is not supported.
  *
  * To the rest of the system CAN messages are described as can::Frame structure.
  * Sending messages is performed directly in the caller's thread.
  * Receiving messages is performed using a dedicated thread. This thread awaits
- * incoming messages and demultiplexes them to matching registered BMS/Motors units.
+ * incoming messages and demultiplexes them to matching registered BMS/Motors
+ * units.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,26 +44,27 @@ namespace can {
 
 struct Frame {
   static constexpr uint32_t kExtendedMask = 0x80000000U;
-  uint32_t  id;
-  bool      extended;
-  uint8_t   len;
-  uint8_t   data[8];
+  uint32_t id;
+  bool extended;
+  uint8_t len;
+  uint8_t data[8];
 };
 
-}   // namespace can
+}  // namespace can
 
 class CanProccesor {
  public:
- /**
-  * @brief To be called by CAN receive side. Object processes received CAN
-  * message and updates its local data
-  *
-  * @param message received CAN message to be processed
-  */
+  /**
+   * @brief To be called by CAN receive side. Object processes received CAN
+   * message and updates its local data
+   *
+   * @param message received CAN message to be processed
+   */
   virtual void processNewData(can::Frame& message) = 0;
 
   /**
-   * @brief To be called by CAN receive side to find owner of receinve can::Frame
+   * @brief To be called by CAN receive side to find owner of receinve
+   * can::Frame
    *
    * @param id        - of the received can::Frame
    * @param extended  - is the id extended?
@@ -72,16 +74,16 @@ class CanProccesor {
 };
 
 /**
- * Can implements singleton pattern to encapsulate one can interface, namely can0.
- * During object construction, can intereface is mapped onto socket_ member variable.
- * Furthermore, constructor spawns reading thread which waits on incoming can messages.
- * These messages are put into one of consuming queues based on configured id spaces.
- * The reading itself is performed in overriden run() method.
+ * Can implements singleton pattern to encapsulate one can interface, namely
+ * can0. During object construction, can intereface is mapped onto socket_
+ * member variable. Furthermore, constructor spawns reading thread which waits
+ * on incoming can messages. These messages are put into one of consuming queues
+ * based on configured id spaces. The reading itself is performed in overriden
+ * run() method.
  */
 class Can : public concurrent::Thread {
  public:
-  static Can& getInstance()
-  {
+  static Can& getInstance() {
     static Can can;
     return can;
   }
@@ -128,12 +130,14 @@ class Can : public concurrent::Thread {
   ~Can();
 
  private:
-  int   socket_;
-  bool  running_;
-  std::vector<CanProccesor*>  processors_;
-  concurrent::Lock            socket_lock_;
+  int socket_;
+  bool running_;
+  std::vector<CanProccesor*> processors_;
+  concurrent::Lock socket_lock_;
 };
 
-}}}   // namespace hyped::utils::io
+}  // namespace io
+}  // namespace utils
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_UTILS_IO_CAN_HPP_

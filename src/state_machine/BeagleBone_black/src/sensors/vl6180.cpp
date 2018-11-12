@@ -22,30 +22,29 @@
 
 #include <cstdint>
 
+#include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
 #include "utils/timer.hpp"
-#include "utils/concurrent/thread.hpp"
-
 
 // Register addresses
-constexpr uint16_t kIdentificationModelId              = 0x000;
-constexpr uint16_t kSystemInterruptClear               = 0x0015;
-constexpr uint16_t kSystemFreshOutOfReset              = 0x0016;
-constexpr uint16_t kSysrangeStart                      = 0x0018;
-constexpr uint16_t kSysrangeIntermeasurementPeriod     = 0x001B;
-constexpr uint16_t kSysrangeMaxConvergenceTime         = 0x001C;
-constexpr uint16_t kSysrangeVhvRecalibrate             = 0x002E;
-constexpr uint16_t kResultRangeStatus                  = 0x004D;
-constexpr uint16_t kResultRangeVal                     = 0x0062;
-constexpr uint16_t kModeStartStop                      = 0x01;
-constexpr uint16_t kModeContinuous                     = 0x02;
-constexpr uint16_t kResultInterruptStatusGpio          = 0x4F;
-constexpr uint16_t kSystemInterruptConfigGpio          = 0x014;
+constexpr uint16_t kIdentificationModelId = 0x000;
+constexpr uint16_t kSystemInterruptClear = 0x0015;
+constexpr uint16_t kSystemFreshOutOfReset = 0x0016;
+constexpr uint16_t kSysrangeStart = 0x0018;
+constexpr uint16_t kSysrangeIntermeasurementPeriod = 0x001B;
+constexpr uint16_t kSysrangeMaxConvergenceTime = 0x001C;
+constexpr uint16_t kSysrangeVhvRecalibrate = 0x002E;
+constexpr uint16_t kResultRangeStatus = 0x004D;
+constexpr uint16_t kResultRangeVal = 0x0062;
+constexpr uint16_t kModeStartStop = 0x01;
+constexpr uint16_t kModeContinuous = 0x02;
+constexpr uint16_t kResultInterruptStatusGpio = 0x4F;
+constexpr uint16_t kSystemInterruptConfigGpio = 0x014;
 
 namespace hyped {
 
-using utils::io::I2C;
 using utils::concurrent::Thread;
+using utils::io::I2C;
 
 namespace sensors {
 
@@ -54,23 +53,20 @@ VL6180::VL6180(uint8_t i2c_addr, Logger& log)
       i2c_addr_(i2c_addr),
       i2c_(I2C::getInstance()),
       is_online_(false),
-      timeout_(false)
-{
+      timeout_(false) {
   // Create I2C instance get register address
   turnOn();
   log_.INFO("VL6180", "Creating a sensor with id: %d", i2c_addr);
 }
 
-VL6180::~VL6180()
-{
+VL6180::~VL6180() {
   // turn off ranging
   writeByte(kSysrangeStart, 0x01);
   Thread::sleep(100);
   log_.INFO("VL6180", "Stop Ranging command");
 }
 
-void VL6180::turnOn()
-{
+void VL6180::turnOn() {
   log_.INFO("VL6180", "Trying to turn sensor on");
 
   if (!waitDeviceBooted()) {
@@ -151,19 +147,16 @@ void VL6180::turnOn()
   }
 }
 
-void VL6180::setMaxConvergenceTime(uint8_t time_ms)
-{
+void VL6180::setMaxConvergenceTime(uint8_t time_ms) {
   writeByte(kSysrangeMaxConvergenceTime, time_ms);
 }
 
-void VL6180::getData(Proximity* proxi)
-{
+void VL6180::getData(Proximity* proxi) {
   proxi->val = continuousRangeDistance();
   proxi->operational = is_online_;
 }
 
-void VL6180::startRanging()
-{
+void VL6180::startRanging() {
   if (!writeByte(kSysrangeStart, 0x01)) {
     is_online_ = false;
   } else {
@@ -171,9 +164,7 @@ void VL6180::startRanging()
   }
 }
 
-
-bool VL6180::isOnline()
-{
+bool VL6180::isOnline() {
   uint8_t data;
   uint8_t status;
 
@@ -193,13 +184,12 @@ bool VL6180::isOnline()
   return is_online_;
 }
 
-uint8_t VL6180::continuousRangeDistance()
-{
+uint8_t VL6180::continuousRangeDistance() {
   if (!is_online_) return 255;
   uint64_t start = utils::Timer::getTimeMicros();
   uint8_t data = 1;
   uint8_t interrupt = 1;
-  uint64_t timeout = 30000;   // micro s
+  uint64_t timeout = 30000;  // micro s
   // Make sure we are in continuous ranging mode
   readByte(kResultInterruptStatusGpio, &interrupt);
 
@@ -216,69 +206,70 @@ uint8_t VL6180::continuousRangeDistance()
       return 255;
     }
   }
-  readByte(kResultRangeVal, &data);   // read the sampled data
+  readByte(kResultRangeVal, &data);  // read the sampled data
   log_.DBG3("VL6180", "Sensor continuous range: %f\n", data);
   writeByte(kSystemInterruptClear, 0x01);
   isOnline();
   return data;
 }
 
-void VL6180::checkStatus()
-{
+void VL6180::checkStatus() {
   uint8_t data;
   uint8_t status;
   // Check for an error in the error/status register
   readByte(kResultRangeStatus, &data);
   status = data >> 4;
 
-    // Parse the error
+  // Parse the error
   switch (status) {
     case 1:
       log_.ERR("VL6180", "System error detected. No measurement possible.");
-    break;
+      break;
     case 2:
       log_.ERR("VL6180", "System error detected. No measurement possible.");
-    break;
+      break;
     case 3:
       log_.ERR("VL6180", "System error detected. No measurement possible.");
-    break;
+      break;
     case 4:
       log_.ERR("VL6180", "System error detected. No measurement possible.");
-    break;
+      break;
     case 5:
       log_.ERR("VL6180", "System error detected. No measurement possible.");
-    break;
+      break;
     case 6:
       log_.ERR("VL6180", "Early convergence estimate check failed.");
-    break;
+      break;
     case 7:
       log_.ERR("VL6180", "System did not converge before the specified max.");
-    break;
+      break;
     case 8:
       log_.ERR("VL6180", "Ignore threshold check failed");
-    break;
+      break;
     case 11:
-      log_.ERR("VL6180", "Ambient conditions too high. Measurement invalidated");
-    break;
+      log_.ERR("VL6180",
+               "Ambient conditions too high. Measurement invalidated");
+      break;
     case 12:
       log_.ERR("VL6180", "Range < 0");
-    break;
+      break;
     case 13:
-      log_.ERR("VL6180", "Result is out of range. This occurs typically around 200 mm");
-    break;
+      log_.ERR("VL6180",
+               "Result is out of range. This occurs typically around 200 mm");
+      break;
     case 14:
       log_.ERR("VL6180", "Range < 0");
-    break;
+      break;
     case 15:
-      log_.ERR("VL6180", "Result is out of range. This occurs typically around 200 mm");
-    break;
+      log_.ERR("VL6180",
+               "Result is out of range. This occurs typically around 200 mm");
+      break;
     default:
-          log_.ERR("VL6180", "Unidentified error");
+      log_.ERR("VL6180", "Unidentified error");
   }
 }
 
-bool VL6180::waitDeviceBooted()
-{
+bool VL6180::waitDeviceBooted() {
   // Will hold the return value of the register kSystemFreshOutOfReset
   uint8_t fresh_out_of_reset;
   int send_counter;
@@ -301,8 +292,7 @@ bool VL6180::waitDeviceBooted()
   return false;
 }
 
-bool VL6180::readByte(uint16_t reg_add, uint8_t *data)
-{
+bool VL6180::readByte(uint16_t reg_add, uint8_t* data) {
   uint8_t buffer[2];
   buffer[0] = reg_add >> 8;
   buffer[1] = reg_add & 0xFF;
@@ -311,16 +301,16 @@ bool VL6180::readByte(uint16_t reg_add, uint8_t *data)
   return i2c_.read(i2c_addr_, data, 1);
 }
 
-bool VL6180::writeByte(uint16_t reg_add, char data)
-{
+bool VL6180::writeByte(uint16_t reg_add, char data) {
   uint8_t buffer[3];
-  buffer[0]=reg_add>>8;
-  buffer[1]=reg_add&0xFF;
-  buffer[2]=data;
+  buffer[0] = reg_add >> 8;
+  buffer[1] = reg_add & 0xFF;
+  buffer[2] = data;
 
   return i2c_.write(i2c_addr_, buffer, 3);
 }
 
-}}   // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped
 
 #endif

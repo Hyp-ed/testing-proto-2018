@@ -29,7 +29,6 @@ namespace hyped {
 namespace utils {
 namespace concurrent {
 
-
 class Thread {
  public:
   explicit Thread(uint8_t id, Logger& log);
@@ -75,6 +74,8 @@ class BusyThread : public Thread {
   bool running_ = true;
 };
 
-}}}   // namespace hyped::utils::concurrent
+}  // namespace concurrent
+}  // namespace utils
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_UTILS_CONCURRENT_THREAD_HPP_

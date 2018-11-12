@@ -21,32 +21,33 @@
 #ifndef BEAGLEBONE_BLACK_SENSORS_EM_BRAKE_HPP_
 #define BEAGLEBONE_BLACK_SENSORS_EM_BRAKE_HPP_
 
-#include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
-#include "utils/system.hpp"
+#include "utils/concurrent/thread.hpp"
 #include "utils/io/gpio.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 
-using utils::concurrent::Thread;
 using utils::Logger;
+using utils::concurrent::Thread;
 using utils::io::GPIO;
 
 namespace sensors {
 
-class EmBrake: public Thread {
+class EmBrake : public Thread {
  public:
   EmBrake(Logger& log, bool is_front);
-  void run()    override;
+  void run() override;
 
  private:
-  utils::System&    sys_;
-  data::Data&       data_;
+  utils::System& sys_;
+  data::Data& data_;
   GPIO gpio_pin_;
   static data::EmergencyBrakes em_data_;
   bool is_front_;
 };
 
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_SENSORS_EM_BRAKE_HPP_

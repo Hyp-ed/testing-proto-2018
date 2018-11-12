@@ -21,27 +21,28 @@
 #include "sensors/main.hpp"
 
 #ifndef M_PI
-#define M_PI           3.14159265358979323846
+#define M_PI 3.14159265358979323846
 #endif
 
 #include "data/data.hpp"
-#include "sensors/imu_manager.hpp"
 #include "sensors/bms_manager.hpp"
+#include "sensors/imu_manager.hpp"
 #ifdef PROXI
 #include "sensors/proxi_manager.hpp"
 #endif
+#include "sensors/em_brake.hpp"
 #include "sensors/fake_gpio_counter.hpp"
 #include "sensors/gpio_counter.hpp"
-#include "sensors/em_brake.hpp"
 
-constexpr float kWheelDiameter = 0.08;   // TODO(anyone) Get wheel radius for optical encoder
+constexpr float kWheelDiameter =
+    0.08;  // TODO(anyone) Get wheel radius for optical encoder
 namespace hyped {
 
-using data::Data;
-using data::Sensors;
 using data::Batteries;
-using data::StripeCounter;
+using data::Data;
 using data::SensorCalibration;
+using data::Sensors;
+using data::StripeCounter;
 using utils::System;
 
 namespace sensors {
@@ -55,16 +56,16 @@ Main::Main(uint8_t id, Logger& log)
       proxi_manager_front_(new ProxiManager(log, true, &sensors_.proxi_front)),
       proxi_manager_back_(new ProxiManager(log, false, &sensors_.proxi_back)),
 #endif
-      battery_manager_(new BmsManager(log,
-                                         &batteries_.low_power_batteries,
-                                         &batteries_.high_power_batteries)),
+      battery_manager_(new BmsManager(log, &batteries_.low_power_batteries,
+                                      &batteries_.high_power_batteries)),
       sensor_init_(false),
-      battery_init_(false)
-{
+      battery_init_(false) {
   // @TODO (Anyone) Check THESE PINS
   if (sys_.fake_sensors || sys_.fake_keyence) {
-    keyence_l_ = new FakeGpioCounter(log, sys_.miss_keyence, sys_.double_keyence);
-    keyence_r_ = new FakeGpioCounter(log, sys_.miss_keyence, sys_.double_keyence);
+    keyence_l_ =
+        new FakeGpioCounter(log, sys_.miss_keyence, sys_.double_keyence);
+    keyence_r_ =
+        new FakeGpioCounter(log, sys_.miss_keyence, sys_.double_keyence);
     optical_encoder_l_ = new FakeGpioCounter(log, false, false);
     optical_encoder_r_ = new FakeGpioCounter(log, false, false);
   } else {
@@ -92,8 +93,7 @@ Main::Main(uint8_t id, Logger& log)
   em_brake_rear_->start();
 }
 
-void Main::run()
-{
+void Main::run() {
   // start all managers
   imu_manager_->start();
 #ifdef PROXI
@@ -106,18 +106,20 @@ void Main::run()
   while (!sensor_init_) {
     if (imu_manager_->updated()
 #ifdef PROXI
-    && proxi_manager_front_->updated() && proxi_manager_back_->updated()
+        && proxi_manager_front_->updated() && proxi_manager_back_->updated()
 #endif
-      ) {
+    ) {
       data_.setSensorsData(sensors_);
 
       // Get calibration data
       SensorCalibration sensor_calibration_data;
 #ifdef PROXI
-      sensor_calibration_data.proxi_front_variance = proxi_manager_front_->getCalibrationData();
-      sensor_calibration_data.proxi_back_variance  = proxi_manager_back_->getCalibrationData();
+      sensor_calibration_data.proxi_front_variance =
+          proxi_manager_front_->getCalibrationData();
+      sensor_calibration_data.proxi_back_variance =
+          proxi_manager_back_->getCalibrationData();
 #endif
-      sensor_calibration_data.imu_variance         = imu_manager_->getCalibrationData();
+      sensor_calibration_data.imu_variance = imu_manager_->getCalibrationData();
       data_.setCalibrationData(sensor_calibration_data);
       sensor_init_ = true;
 
@@ -141,16 +143,17 @@ void Main::run()
 
   // work loop
   while (sys_.running_) {
-    // Write sensor data to data structure only when all the imu or proxi values are different
+    // Write sensor data to data structure only when all the imu or proxi values
+    // are different
     if (imu_manager_->updated()) {
       sensors_.keyence_stripe_counter[0] = keyence_l_->getStripeCounter();
       sensors_.keyence_stripe_counter[1] = keyence_r_->getStripeCounter();
-      sensors_.optical_enc_distance[0] = optical_encoder_l_->getStripeCounter().count.value *
-                                      M_PI *
-                                      kWheelDiameter;
-      sensors_.optical_enc_distance[1] = optical_encoder_r_->getStripeCounter().count.value *
-                                      M_PI *
-                                      kWheelDiameter;
+      sensors_.optical_enc_distance[0] =
+          optical_encoder_l_->getStripeCounter().count.value * M_PI *
+          kWheelDiameter;
+      sensors_.optical_enc_distance[1] =
+          optical_encoder_r_->getStripeCounter().count.value * M_PI *
+          kWheelDiameter;
       data_.setSensorsData(sensors_);
       // Update manager timestamp with a function
       imu_manager_->resetTimestamp();
@@ -167,7 +170,8 @@ void Main::run()
       battery_manager_->resetTimestamp();
 
       // check health of batteries
-      if (batteries_.module_status != data::ModuleStatus::kCriticalFailure && !sys_.fake_sensors) {
+      if (batteries_.module_status != data::ModuleStatus::kCriticalFailure &&
+          !sys_.fake_sensors) {
         if (!batteriesInRange()) {
           log_.ERR("SENSORS", "battery failure detected");
           batteries_.module_status = data::ModuleStatus::kCriticalFailure;
@@ -181,25 +185,29 @@ void Main::run()
   }
 }
 
-bool Main::batteriesInRange()
-{
+bool Main::batteriesInRange() {
   // check all LP and HP battery values are in expected range
 
   // check LP
   for (int i = 0; i < data::Batteries::kNumLPBatteries; i++) {
     auto& battery = batteries_.low_power_batteries[i];
-    if (battery.voltage < 140 || battery.voltage > 252) {   // voltage in 14V to 25.2V
-      log_.ERR("SENSORS", "BMS LP %d voltage out of range: %d", i, battery.voltage);
+    if (battery.voltage < 140 ||
+        battery.voltage > 252) {  // voltage in 14V to 25.2V
+      log_.ERR("SENSORS", "BMS LP %d voltage out of range: %d", i,
+               battery.voltage);
       return false;
     }
 
-    if (battery.current < 0 || battery.current > 300) {       // current in 0A to 30A
-      log_.ERR("SENSORS", "BMS LP %d current out of range: %d", i, battery.current);
+    if (battery.current < 0 || battery.current > 300) {  // current in 0A to 30A
+      log_.ERR("SENSORS", "BMS LP %d current out of range: %d", i,
+               battery.current);
       return false;
     }
 
-    if (battery.temperature < -20 || battery.temperature > 70) {  // temperature in -20C to 70C
-      log_.ERR("SENSORS", "BMS LP %d temperature out of range: %d", i, battery.temperature);
+    if (battery.temperature < -20 ||
+        battery.temperature > 70) {  // temperature in -20C to 70C
+      log_.ERR("SENSORS", "BMS LP %d temperature out of range: %d", i,
+               battery.temperature);
       return false;
     }
   }
@@ -207,22 +215,29 @@ bool Main::batteriesInRange()
   // check HP
   for (int i = 0; i < data::Batteries::kNumHPBatteries; i++) {
     auto& battery = batteries_.high_power_batteries[i];
-    if (battery.voltage < 720 || battery.voltage > 1246) {   // voltage in 72V to 124.6V
-      log_.ERR("SENSORS", "BMS HP %d voltage out of range: %d", i, battery.voltage);
+    if (battery.voltage < 720 ||
+        battery.voltage > 1246) {  // voltage in 72V to 124.6V
+      log_.ERR("SENSORS", "BMS HP %d voltage out of range: %d", i,
+               battery.voltage);
       return false;
     }
 
-    if (battery.current < -4000 || battery.current > 13500) {       // current in -400A to 1350A
-      log_.ERR("SENSORS", "BMS HP %d current out of range: %d", i, battery.current);
+    if (battery.current < -4000 ||
+        battery.current > 13500) {  // current in -400A to 1350A
+      log_.ERR("SENSORS", "BMS HP %d current out of range: %d", i,
+               battery.current);
       return false;
     }
 
-    if (battery.temperature < -20 || battery.temperature > 70) {  // temperature in -20C to 70C
-      log_.ERR("SENSORS", "BMS HP %d temperature out of range: %d", i, battery.temperature);
+    if (battery.temperature < -20 ||
+        battery.temperature > 70) {  // temperature in -20C to 70C
+      log_.ERR("SENSORS", "BMS HP %d temperature out of range: %d", i,
+               battery.temperature);
       return false;
     }
   }
   return true;
 }
 
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped

@@ -52,22 +52,16 @@ class Timer {
 
 class ScopedTimer {
  public:
-  explicit ScopedTimer(Timer* t)
-      : timer_(t)
-  {
-    timer_->start();
-  }
+  explicit ScopedTimer(Timer* t) : timer_(t) { timer_->start(); }
 
-  ~ScopedTimer()
-  {
-    timer_->stop();
-  }
+  ~ScopedTimer() { timer_->stop(); }
 
  private:
   Timer* timer_;
   NO_COPY_ASSIGN(ScopedTimer);
 };
 
-}}  // namespace hyped::utils
+}  // namespace utils
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_UTILS_TIMER_HPP_

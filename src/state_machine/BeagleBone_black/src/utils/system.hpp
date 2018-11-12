@@ -71,12 +71,13 @@ class System {
   bool miss_keyence;
   bool fake_batteries;
   bool double_keyence;
-  bool accurate;    // use accurate fake sensors
+  bool accurate;  // use accurate fake sensors
 
   // barriers
   /**
-   * @brief Barrier used by navigation and motor control modules on stm transition to accelerating
-   *        state. Navigation must finish calibration before motors start spinning.
+   * @brief Barrier used by navigation and motor control modules on stm
+   * transition to accelerating state. Navigation must finish calibration before
+   * motors start spinning.
    */
   Barrier navigation_motors_sync_ = Barrier(2);
   bool running_;
@@ -92,6 +93,7 @@ class System {
   NO_COPY_ASSIGN(System);
 };
 
-}}  // namespace hyped::utils
+}  // namespace utils
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_UTILS_SYSTEM_HPP_

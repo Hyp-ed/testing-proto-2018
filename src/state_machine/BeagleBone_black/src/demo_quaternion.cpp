@@ -25,17 +25,14 @@
 using hyped::utils::math::Quaternion;
 
 template <typename T>
-void print(Quaternion<T> &q)
-{
+void print(Quaternion<T> &q) {
   char a[4] = {' ', 'i', 'j', 'k'};
   char op[4] = {'+', '+', '+', ' '};
-  for (int i = 0; i < 4; i++)
-    std::cout << q[i] << a[i] << ' ' << op[i] << ' ';
+  for (int i = 0; i < 4; i++) std::cout << q[i] << a[i] << ' ' << op[i] << ' ';
   std::cout << '\n';
 }
 
-int main()
-{
+int main() {
   Quaternion<int> quaternion1;
   Quaternion<int> quaternion2;
   Quaternion<int> quaternion3;
@@ -53,9 +50,7 @@ int main()
   print(quaternion2);
   print(quaternion3);
 
-  for (int i = 0; i < 4; i++)
-    quaternion1[i] = i+1,
-      quaternion4[i] = 1.1;
+  for (int i = 0; i < 4; i++) quaternion1[i] = i + 1, quaternion4[i] = 1.1;
 
   print(quaternion4);
 
@@ -71,10 +66,10 @@ int main()
   quaternion4 = quaternion4 + quaternion1;
   quaternion4 = quaternion4 - quaternion1;
 
-  quaternion8 = quaternion5*quaternion1;
+  quaternion8 = quaternion5 * quaternion1;
 
-  quaternion10-=quaternion11;
-  quaternion10+=quaternion11;
+  quaternion10 -= quaternion11;
+  quaternion10 += quaternion11;
 
   (quaternion1 == quaternion3) ? std::cout << "False\n" : std::cout << "True\n";
 
@@ -84,8 +79,8 @@ int main()
 
   (quaternion8 == quaternion9) ? std::cout << "True\n" : std::cout << "False\n";
 
-  (quaternion10 == quaternion11) ? std::cout << "True\n" : std::cout << "False\n";
-
+  (quaternion10 == quaternion11) ? std::cout << "True\n"
+                                 : std::cout << "False\n";
 
   // TODO(Adi): Check if this function is required
   // (quaternion6.toUnitQuaternion() == Quaternion7) ?

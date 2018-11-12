@@ -23,37 +23,40 @@
 
 #include <cstdint>
 
-#include "sensors/manager_interface.hpp"
-#include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
+#include "sensors/manager_interface.hpp"
+#include "utils/concurrent/thread.hpp"
 #include "utils/system.hpp"
 
 namespace hyped {
 
-using utils::concurrent::Thread;
 using utils::Logger;
+using utils::concurrent::Thread;
 
 namespace sensors {
 
-class BmsManager: public ManagerInterface  {
+class BmsManager : public ManagerInterface {
   typedef array<Battery, data::Batteries::kNumLPBatteries> BatteriesLP;
   typedef array<Battery, data::Batteries::kNumHPBatteries> BatteriesHP;
+
  public:
-  BmsManager(Logger& log, BatteriesLP *lp_batteries, BatteriesHP* hp_batteries);
+  BmsManager(Logger& log, BatteriesLP* lp_batteries, BatteriesHP* hp_batteries);
   void run() override;
   bool updated() override;
   void resetTimestamp() override;
 
  private:
-  BatteriesLP*    lp_batteries_;
-  BatteriesHP*    hp_batteries_;
-  BMSInterface*   bms_[data::Batteries::kNumLPBatteries+data::Batteries::kNumHPBatteries];
-  utils::System&    sys_;
+  BatteriesLP* lp_batteries_;
+  BatteriesHP* hp_batteries_;
+  BMSInterface*
+      bms_[data::Batteries::kNumLPBatteries + data::Batteries::kNumHPBatteries];
+  utils::System& sys_;
 
   uint64_t timestamp;
 };
 
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_SENSORS_BMS_MANAGER_HPP_

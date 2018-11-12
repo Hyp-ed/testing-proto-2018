@@ -23,46 +23,49 @@
 
 #include <cstdint>
 
-#include "sensors/manager_interface.hpp"
-#include "utils/concurrent/thread.hpp"
 #include "data/data.hpp"
 #include "sensors/interface.hpp"
-#include "utils/system.hpp"
+#include "sensors/manager_interface.hpp"
+#include "utils/concurrent/thread.hpp"
 #include "utils/math/statistics.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 
-using utils::concurrent::Thread;
-using utils::Logger;
 using data::NavigationVector;
+using utils::Logger;
+using utils::concurrent::Thread;
 using utils::math::OnlineStatistics;
 
 namespace sensors {
 
-class ImuManager: public ImuManagerInterface {
-  typedef array<array<NavigationVector, 2>, data::Sensors::kNumImus> CalibrationArray;
-  typedef data::DataPoint<array<Imu, data::Sensors::kNumImus>>       DataArray;
+class ImuManager : public ImuManagerInterface {
+  typedef array<array<NavigationVector, 2>, data::Sensors::kNumImus>
+      CalibrationArray;
+  typedef data::DataPoint<array<Imu, data::Sensors::kNumImus>> DataArray;
+
  public:
-  ImuManager(Logger& log, DataArray *imu);
-  void run()                            override;
-  bool updated()                        override;
-  void resetTimestamp()                 override;
+  ImuManager(Logger& log, DataArray* imu);
+  void run() override;
+  bool updated() override;
+  void resetTimestamp() override;
   CalibrationArray getCalibrationData() override;
 
  private:
-  utils::System&    sys_;
-  DataArray*        sensors_imu_;
+  utils::System& sys_;
+  DataArray* sensors_imu_;
 
-  uint8_t           chip_select_[data::Sensors::kNumImus];
-  ImuInterface*     imu_[data::Sensors::kNumImus];
-  CalibrationArray  imu_calibrations_;
-  bool              is_fake_;
-  bool              is_calibrated_;
-  uint32_t          calib_counter_;
+  uint8_t chip_select_[data::Sensors::kNumImus];
+  ImuInterface* imu_[data::Sensors::kNumImus];
+  CalibrationArray imu_calibrations_;
+  bool is_fake_;
+  bool is_calibrated_;
+  uint32_t calib_counter_;
 
   OnlineStatistics<NavigationVector> stats_[data::Sensors::kNumImus][2];
 };
 
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_SENSORS_IMU_MANAGER_HPP_

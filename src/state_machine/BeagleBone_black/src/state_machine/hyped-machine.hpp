@@ -5,8 +5,9 @@
  * Date: 11. February 2018
  * Description:
  * HypedMachine wraps around State objects, i.e. functions as a State manager.
- * HypedMachine reacts to events through handleEvent() function. Fucntion transition()
- * finalises changes of current state and facilitate updates to the shared data structure.
+ * HypedMachine reacts to events through handleEvent() function. Fucntion
+ * transition() finalises changes of current state and facilitate updates to the
+ * shared data structure.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,8 +30,8 @@
 #include "state_machine/event.hpp"
 #include "state_machine/states.hpp"
 
-#include "utils/logger.hpp"
 #include "utils/io/gpio.hpp"
+#include "utils/logger.hpp"
 namespace hyped {
 using utils::io::GPIO;
 namespace state_machine {
@@ -40,21 +41,22 @@ class HypedMachine {
  public:
   explicit HypedMachine(utils::Logger& log);
   void handleEvent(Event event);
-  void transition(State *state);
+  void transition(State* state);
   void reset();
 
   static void setupEmbrakes();
   static void engageEmbrakes();
 
  private:
-  State*             current_state_;
-  utils::Logger&     log_;
+  State* current_state_;
+  utils::Logger& log_;
   data::StateMachine state_machine_;
 
   static GPIO* pin_embrake_;
   static GPIO* pin_water_;
 };
 
-}}   // namespace hyped::state_machine
+}  // namespace state_machine
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_STATE_MACHINE_HYPED_MACHINE_HPP_

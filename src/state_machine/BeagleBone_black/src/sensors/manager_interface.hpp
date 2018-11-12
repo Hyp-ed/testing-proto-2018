@@ -31,8 +31,8 @@ using data::Imu;
 using data::Proximity;
 #endif
 using data::Battery;
-using utils::concurrent::Thread;
 using data::NavigationVector;
+using utils::concurrent::Thread;
 
 namespace sensors {
 
@@ -40,11 +40,12 @@ class ManagerInterface : public Thread {
  public:
   /**
    * @brief Checks if the data has been updated
-   * 
+   *
    */
   virtual bool updated() = 0;
   virtual void resetTimestamp() = 0;
   ManagerInterface(utils::Logger& log) : Thread(log), old_timestamp_(0) {}
+
  protected:
   uint64_t old_timestamp_;
 };
@@ -52,7 +53,8 @@ class ManagerInterface : public Thread {
 class ImuManagerInterface : public ManagerInterface {
  public:
   ImuManagerInterface(utils::Logger& log) : ManagerInterface(log) {}
-  virtual array<array<NavigationVector, 2>, data::Sensors::kNumImus> getCalibrationData() = 0;
+  virtual array<array<NavigationVector, 2>, data::Sensors::kNumImus>
+  getCalibrationData() = 0;
 };
 #ifdef PROXI
 class ProxiManagerInterface : public ManagerInterface {
@@ -61,6 +63,7 @@ class ProxiManagerInterface : public ManagerInterface {
   virtual array<float, data::Sensors::kNumProximities> getCalibrationData() = 0;
 };
 #endif
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_SENSORS_MANAGER_INTERFACE_HPP_

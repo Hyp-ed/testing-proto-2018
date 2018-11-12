@@ -18,25 +18,23 @@
  *    limitations under the License.
  */
 
-
-#include "sensors/vl6180.hpp"
-#include "utils/logger.hpp"
-#include "utils/system.hpp"
-#include "utils/concurrent/thread.hpp"
 #include "sensors/interface.hpp"
+#include "sensors/vl6180.hpp"
+#include "utils/concurrent/thread.hpp"
+#include "utils/logger.hpp"
 #include "utils/math/statistics.hpp"
+#include "utils/system.hpp"
 
+using hyped::sensors::ProxiInterface;
 using hyped::sensors::VL6180;
 using hyped::utils::Logger;
 using hyped::utils::concurrent::Thread;
 using hyped::utils::io::I2C;
-using hyped::sensors::ProxiInterface;
 using hyped::utils::math::RollingStatistics;
 
- constexpr uint8_t kNumOfProxis = 8;
+constexpr uint8_t kNumOfProxis = 8;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   hyped::utils::System::parseArgs(argc, argv);
   I2C& i2c = I2C::getInstance();
   Logger log(true, 1);
@@ -45,11 +43,11 @@ int main(int argc, char* argv[])
   VL6180* proxi_[kNumOfProxis];
 
   for (int i = 0; i < kNumOfProxis; i++) {
-      i2c.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
-      log.INFO("Multiplexer", "Opening channel: %d", i);
-      VL6180* proxi = new VL6180(0x29, log);
-      proxi_[i] = proxi;
-    }
+    i2c.write(kMultiplexerAddr, 0x01 << i);  // open particular i2c channel
+    log.INFO("Multiplexer", "Opening channel: %d", i);
+    VL6180* proxi = new VL6180(0x29, log);
+    proxi_[i] = proxi;
+  }
 
   for (int i = 0; i < 100; i++) {
     for (int j = 0; j < kNumOfProxis; j++) {
@@ -57,9 +55,10 @@ int main(int argc, char* argv[])
       hyped::data::Proximity proxi;
       proxi_[j]->getData(&proxi);
       log.INFO("Multiplexer-test", "Sensor %d, reading %d", j, proxi.val);
-      log.INFO("Multiplexer-test", "operational: %s", proxi.operational ? "true" : "false");
+      log.INFO("Multiplexer-test", "operational: %s",
+               proxi.operational ? "true" : "false");
     }
     Thread::sleep(10);
   }
- 	return 0;
+  return 0;
 }

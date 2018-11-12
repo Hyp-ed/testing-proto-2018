@@ -28,19 +28,15 @@ using hyped::utils::math::Kalman;
 using hyped::utils::math::Vector;
 
 template <typename T, int dimension>
-void print(const Vector<T, dimension>& vector)
-{
-  for (int i = 0; i < dimension; i++)
-    std::cout << vector[i] << '\t';
+void print(const Vector<T, dimension>& vector) {
+  for (int i = 0; i < dimension; i++) std::cout << vector[i] << '\t';
   std::cout << '\n';
 }
 
-int main()
-{
+int main() {
   Kalman<Vector<double, 1>> kalman(Vector<double, 1>(0), Vector<double, 1>(1),
                                    Vector<double, 1>(1));
 
-  for (int i = 0; i < 100; i++)
-    print(kalman.filter(Vector<double, 1>(i)));
+  for (int i = 0; i < 100; i++) print(kalman.filter(Vector<double, 1>(i)));
   std::cout << '\n';
 }

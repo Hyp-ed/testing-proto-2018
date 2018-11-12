@@ -24,13 +24,13 @@
 #include "utils/io/can.hpp"
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
-#include "utils/utils.hpp"
 #include "utils/timer.hpp"
+#include "utils/utils.hpp"
 
 namespace hyped {
 namespace sensors {
 
-std::vector<uint8_t> BMS::existing_ids_;    // NOLINT [build/include_what_you_use]
+std::vector<uint8_t> BMS::existing_ids_;  // NOLINT [build/include_what_you_use]
 int16_t BMS::current_ = 0;
 BMS::BMS(uint8_t id, Logger& log)
     : Thread(log),
@@ -39,13 +39,13 @@ BMS::BMS(uint8_t id, Logger& log)
       id_base_(bms::kIdBase + (bms::kIdIncrement * id_)),
       last_update_time_(0),
       can_(Can::getInstance()),
-      running_(false)
-{
+      running_(false) {
   ASSERT(id < data::Batteries::kNumLPBatteries);
   // verify this BMS unit has not been instantiated
   for (uint8_t i : existing_ids_) {
     if (id == i) {
-      log_.ERR("BMS", "BMS %d already exists, duplicate unit instantiation", id);
+      log_.ERR("BMS", "BMS %d already exists, duplicate unit instantiation",
+               id);
       return;
     }
   }
@@ -58,28 +58,25 @@ BMS::BMS(uint8_t id, Logger& log)
   running_ = true;
 }
 
-BMS::~BMS()
-{
+BMS::~BMS() {
   running_ = false;
   join();
 }
 
-void BMS::request()
-{
+void BMS::request() {
   // send request CanFrame
   utils::io::can::Frame message;
-  message.id        = bms::kIdBase + (bms::kIdIncrement * id_);
-  message.extended  = true;
-  message.len       = 2;
-  message.data[0]   = 0;
-  message.data[1]   = 0;
+  message.id = bms::kIdBase + (bms::kIdIncrement * id_);
+  message.extended = true;
+  message.len = 2;
+  message.data[0] = 0;
+  message.data[1] = 0;
 
   can_.send(message);
   log_.DBG1("BMS", "module %u: request message sent", id_);
 }
 
-void BMS::run()
-{
+void BMS::run() {
   log_.INFO("BMS", "module %u: starting BMS", id_);
   while (running_) {
     request();
@@ -88,8 +85,7 @@ void BMS::run()
   log_.INFO("BMS", "module %u: stopped BMS", id_);
 }
 
-bool BMS::hasId(uint32_t id, bool extended)
-{
+bool BMS::hasId(uint32_t id, bool extended) {
   if (!extended) return false;  // this BMS only understands extended IDs
 
   // LP BMS CAN messages
@@ -101,9 +97,9 @@ bool BMS::hasId(uint32_t id, bool extended)
   return false;
 }
 
-void BMS::processNewData(utils::io::can::Frame& message)
-{
-  log_.DBG1("BMS", "module %u: received CAN message with id %d", id_, message.id);
+void BMS::processNewData(utils::io::can::Frame& message) {
+  log_.DBG1("BMS", "module %u: received CAN message with id %d", id_,
+            message.id);
 
   // check current CAN message
   if (message.id == 0x28) {
@@ -119,52 +115,52 @@ void BMS::processNewData(utils::io::can::Frame& message)
   log_.DBG2("BMS", "message data[0,1] %d %d", message.data[0], message.data[1]);
   uint8_t offset = message.id - (bms::kIdBase + (bms::kIdIncrement * id_));
   switch (offset) {
-    case 0x1:   // cells 1-4
+    case 0x1:  // cells 1-4
       for (int i = 0; i < 4; i++) {
-        data_.voltage[i] = (message.data[2*i] << 8) | message.data[2*i + 1];
+        data_.voltage[i] = (message.data[2 * i] << 8) | message.data[2 * i + 1];
       }
       break;
-    case 0x2:   // cells 5-7
+    case 0x2:  // cells 5-7
       for (int i = 0; i < 3; i++) {
-        data_.voltage[4 + i] = (message.data[2*i] << 8) | message.data[2*i + 1];
+        data_.voltage[4 + i] =
+            (message.data[2 * i] << 8) | message.data[2 * i + 1];
       }
       break;
-    case 0x3:   // ignore, no cells connected
+    case 0x3:  // ignore, no cells connected
       break;
-    case 0x4:   // temperature
+    case 0x4:  // temperature
       data_.temperature = message.data[0] - bms::Data::kTemperatureOffset;
       break;
     default:
       log_.ERR("BMS", "received invalid message, id %d, CANID %d, offset %d",
-          id_, message.id, offset);
+               id_, message.id, offset);
   }
 
   last_update_time_ = utils::Timer::getTimeMicros();
 }
 
-
-bool BMS::isOnline()
-{
+bool BMS::isOnline() {
   // consider online if the data has been updated in the last second
   return (utils::Timer::getTimeMicros() - last_update_time_) < 1000000;
 }
 
-void BMS::getData(Battery* battery)
-{
+void BMS::getData(Battery* battery) {
   battery->voltage = 0;
-  for (uint16_t v: data_.voltage) battery->voltage += v;
-  battery->voltage    /= 100;  // scale to 0.1V
+  for (uint16_t v : data_.voltage) battery->voltage += v;
+  battery->voltage /= 100;  // scale to 0.1V
   battery->temperature = data_.temperature;
-  battery->current     = (-1*current_)/2;
+  battery->current = (-1 * current_) / 2;
 
   // charge calculation
-  if (battery->voltage > 240) {                                       // constant high
+  if (battery->voltage > 240) {  // constant high
     battery->charge = 95;
-  } else if (240 >= battery->voltage && battery->voltage >= 180) {    // linear high
+  } else if (240 >= battery->voltage &&
+             battery->voltage >= 180) {  // linear high
     battery->charge = battery->voltage / 0.75 - 225;
-  } else if (180 >= battery->voltage && battery->voltage >= 150) {    // linear low
+  } else if (180 >= battery->voltage &&
+             battery->voltage >= 150) {  // linear low
     battery->charge = battery->voltage / 2 - 75;
-  } else {                                                            // constant low
+  } else {  // constant low
     battery->charge = 0;
   }
 }
@@ -172,18 +168,19 @@ void BMS::getData(Battery* battery)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // BMSHP
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-std::vector<uint16_t> BMSHP::existing_ids_;   // NOLINT [build/include_what_you_use]
+std::vector<uint16_t>
+    BMSHP::existing_ids_;  // NOLINT [build/include_what_you_use]
 
 BMSHP::BMSHP(uint16_t id, Logger& log)
     : log_(log),
-      can_id_(id*2 + bms::kHPBase),
-      local_data_ {},
-      last_update_time_(0)
-{
+      can_id_(id * 2 + bms::kHPBase),
+      local_data_{},
+      last_update_time_(0) {
   // verify this BMSHP unit has not been instantiated
   for (uint16_t i : existing_ids_) {
     if (id == i) {
-      log_.ERR("BMSHP", "BMSHP %d already exists, duplicate unit instantiation", id);
+      log_.ERR("BMSHP", "BMSHP %d already exists, duplicate unit instantiation",
+               id);
       return;
     }
   }
@@ -194,48 +191,40 @@ BMSHP::BMSHP(uint16_t id, Logger& log)
   Can::getInstance().start();
 }
 
-bool BMSHP::isOnline()
-{
+bool BMSHP::isOnline() {
   // consider online if the data has been updated in the last second
   return (utils::Timer::getTimeMicros() - last_update_time_) < 1000000;
 }
 
-void BMSHP::getData(Battery* battery)
-{
-  *battery = local_data_;
-}
+void BMSHP::getData(Battery* battery) { *battery = local_data_; }
 
-bool BMSHP::hasId(uint32_t id, bool extended)
-{
+bool BMSHP::hasId(uint32_t id, bool extended) {
   // only accept a single CAN message
   return id == can_id_ || id == static_cast<uint16_t>(can_id_ + 1);
 }
 
-void BMSHP::processNewData(utils::io::can::Frame& message)
-{
+void BMSHP::processNewData(utils::io::can::Frame& message) {
   // message format is expected to look like this:
   // [ voltageH , volageL  , currentH   , currentL,
   //  charge   , HighTemp , AverageTemp, state, lowVoltageCellH,
   //  lowVoltageCellL ]
   if (message.id == can_id_) {
-    local_data_.voltage     = (message.data[0] << 8) | message.data[1];
-    local_data_.current     = (message.data[2] << 8) | message.data[3];
-    local_data_.charge      = message.data[4] * 0.5;    // data needs scaling
+    local_data_.voltage = (message.data[0] << 8) | message.data[1];
+    local_data_.current = (message.data[2] << 8) | message.data[3];
+    local_data_.charge = message.data[4] * 0.5;  // data needs scaling
     local_data_.temperature = message.data[5];
-    local_data_.low_voltage_cell  = ((message.data[6] << 8) | message.data[7])/10;
+    local_data_.low_voltage_cell =
+        ((message.data[6] << 8) | message.data[7]) / 10;
     last_update_time_ = utils::Timer::getTimeMicros();
   } else {
-    local_data_.high_voltage_cell = ((message.data[0] << 8) | message.data[1])/10;
+    local_data_.high_voltage_cell =
+        ((message.data[0] << 8) | message.data[1]) / 10;
   }
 
   log_.DBG1("BMSHP", "received data Volt,Curr,Char,Temp %u,%u,%u,%d",
-    local_data_.voltage,
-    local_data_.current,
-    local_data_.charge,
-    local_data_.temperature);
+            local_data_.voltage, local_data_.current, local_data_.charge,
+            local_data_.temperature);
 }
 
-
-
-
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped

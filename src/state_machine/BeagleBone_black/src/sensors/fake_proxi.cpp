@@ -22,34 +22,32 @@
 
 #include <random>
 
-#include <iostream>
+#include <algorithm>
+#include <cstdlib>
+#include <ctime>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <algorithm>
-#include <ctime>
-#include <cstdlib>
 
 #include "data/data_point.hpp"
-#include "utils/math/statistics.hpp"
 #include "utils/concurrent/thread.hpp"
+#include "utils/math/statistics.hpp"
 
-using std::chrono::milliseconds;
 using std::chrono::duration;
 using std::chrono::duration_cast;
+using std::chrono::milliseconds;
 
 namespace hyped {
 
-using utils::math::OnlineStatistics;
-using utils::concurrent::Thread;
 using utils::Logger;
+using utils::concurrent::Thread;
+using utils::math::OnlineStatistics;
 
 namespace sensors {
 
 FakeProxi::FakeProxi(Logger& log, std::string file_path)
-    : read_file_(true),
-      log_(log)
-{
+    : read_file_(true), log_(log) {
   readDataFromFile(file_path);
   setData();
 }
@@ -59,14 +57,12 @@ FakeProxi::FakeProxi(Logger& log, uint8_t value, float noise, bool operational)
       value_(value),
       noise_(noise),
       operational_(operational),
-      log_(log)
-{
+      log_(log) {
   setData();
   log_.INFO("Fake-Proxi", "Initialised");
 }
 
-void FakeProxi::setData()
-{
+void FakeProxi::setData() {
   ref_time_ = high_resolution_clock::now();
   reading_counter_ = 0;
   srand(time(NULL));
@@ -74,18 +70,18 @@ void FakeProxi::setData()
 
 void FakeProxi::startRanging() {}
 
-void FakeProxi::getData(Proximity* proxi)
-{
+void FakeProxi::getData(Proximity* proxi) {
   bool operational = false;
   Thread::sleep(10);
   bool update_time = checkTime();
-  reading_counter_ = std::min(reading_counter_, (int64_t) val_read_.size());
+  reading_counter_ = std::min(reading_counter_, (int64_t)val_read_.size());
   if (read_file_ && update_time) {
-    prev_reading_ = val_read_[reading_counter_-1];
-    operational = val_operational_[reading_counter_-1];
+    prev_reading_ = val_read_[reading_counter_ - 1];
+    operational = val_operational_[reading_counter_ - 1];
   } else if (update_time) {
-    prev_reading_ = DataPoint<uint8_t>(kProxiTimeInterval*(reading_counter_-1),
-                                      addNoiseToData(value_, noise_));
+    prev_reading_ =
+        DataPoint<uint8_t>(kProxiTimeInterval * (reading_counter_ - 1),
+                           addNoiseToData(value_, noise_));
     operational = operational_;
   }
 
@@ -94,8 +90,7 @@ void FakeProxi::getData(Proximity* proxi)
   proxi->operational = operational;
 }
 
-void FakeProxi::readDataFromFile(std::string file_path)
-{
+void FakeProxi::readDataFromFile(std::string file_path) {
   std::ifstream file;
   file.open(file_path);
   if (!file.is_open()) {
@@ -119,10 +114,11 @@ void FakeProxi::readDataFromFile(std::string file_path)
       throw std::invalid_argument("Incomplete values for the argument line");
     }
 
-    if (temp[0] != timestamp*time_counter) {
+    if (temp[0] != timestamp * time_counter) {
       throw std::invalid_argument("Timestamp value incorrect");
     }
-    val_read_.push_back(DataPoint<uint8_t>(temp[0], addNoiseToData(temp[1], temp[2])));
+    val_read_.push_back(
+        DataPoint<uint8_t>(temp[0], addNoiseToData(temp[1], temp[2])));
     val_operational_.push_back(temp[3]);
     time_counter++;
   }
@@ -130,12 +126,12 @@ void FakeProxi::readDataFromFile(std::string file_path)
   file.close();
 }
 
-uint8_t FakeProxi::addNoiseToData(uint8_t value, float noise)
-{
+uint8_t FakeProxi::addNoiseToData(uint8_t value, float noise) {
   float temp;
   static std::default_random_engine generator;
 
-  std::normal_distribution<float> distribution(static_cast<float>(value), noise);
+  std::normal_distribution<float> distribution(static_cast<float>(value),
+                                               noise);
   temp = distribution(generator);
   if (temp > 255.0) {
     temp = 255.0;
@@ -145,18 +141,18 @@ uint8_t FakeProxi::addNoiseToData(uint8_t value, float noise)
   return static_cast<uint8_t>(temp);
 }
 
-bool FakeProxi::checkTime()
-{
+bool FakeProxi::checkTime() {
   high_resolution_clock::time_point now = high_resolution_clock::now();
   milliseconds time_span = duration_cast<milliseconds>(now - ref_time_);
 
-  if (time_span.count() < kProxiTimeInterval*reading_counter_) {
+  if (time_span.count() < kProxiTimeInterval * reading_counter_) {
     return false;
   }
 
-  reading_counter_ = time_span.count()/kProxiTimeInterval + 1;
+  reading_counter_ = time_span.count() / kProxiTimeInterval + 1;
   return true;
 }
 
-}}   // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped
 #endif

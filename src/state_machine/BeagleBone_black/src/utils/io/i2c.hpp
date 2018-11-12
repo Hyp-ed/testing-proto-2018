@@ -17,11 +17,10 @@
  *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
-*/
+ */
 
 #ifndef BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
 #define BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_
-
 
 #include <cstdint>
 
@@ -71,13 +70,15 @@ class I2C {
   void setSensorAddress(uint32_t addr);
 
  private:
-  Logger&   log_;
-  int       fd_;
-  uint32_t  sensor_addr_;
+  Logger& log_;
+  int fd_;
+  uint32_t sensor_addr_;
 
   NO_COPY_ASSIGN(I2C);
 };
 
-}}}   // namespace hyped::utils::io
+}  // namespace io
+}  // namespace utils
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_UTILS_IO_I2C_HPP_

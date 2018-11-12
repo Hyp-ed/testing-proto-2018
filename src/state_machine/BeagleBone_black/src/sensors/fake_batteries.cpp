@@ -20,8 +20,8 @@
 
 #include "sensors/fake_batteries.hpp"
 
-#include "utils/timer.hpp"
 #include "data/data.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 
@@ -38,31 +38,27 @@ FakeBatteries::FakeBatteries(Logger& log, bool is_high_voltage, bool is_nominal)
       temperature_(30),
       charge_(75),
       low_voltage_cell_(3300),
-      high_voltage_cell_(3600)
-{}
+      high_voltage_cell_(3600) {}
 
-void FakeBatteries::getData(Battery* battery)
-{
+void FakeBatteries::getData(Battery* battery) {
   if (is_high_voltage_) {
-    battery->voltage           = voltage_;
-    battery->temperature       = temperature_;
-    battery->current           = current_;
-    battery->charge            = charge_;
-    battery->low_voltage_cell  = low_voltage_cell_;
+    battery->voltage = voltage_;
+    battery->temperature = temperature_;
+    battery->current = current_;
+    battery->charge = charge_;
+    battery->low_voltage_cell = low_voltage_cell_;
     battery->high_voltage_cell = high_voltage_cell_;
   } else {
-    battery->voltage           = 170;
-    battery->temperature       = temperature_;
-    battery->current           = 200;
-    battery->charge            = charge_;
-    battery->low_voltage_cell  = 0;
+    battery->voltage = 170;
+    battery->temperature = temperature_;
+    battery->current = 200;
+    battery->charge = charge_;
+    battery->low_voltage_cell = 0;
     battery->high_voltage_cell = 0;
   }
 }
 
-bool FakeBatteries::isOnline()
-{
-  return true;
-}
+bool FakeBatteries::isOnline() { return true; }
 
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped

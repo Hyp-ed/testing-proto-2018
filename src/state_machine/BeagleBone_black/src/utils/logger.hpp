@@ -28,10 +28,8 @@ namespace utils {
 
 class Logger {
  public:
-  Logger()
-      : verbose_(false),
-        debug_(-1)
-  { /* EMPTY */ }
+  Logger() : verbose_(false), debug_(-1) { /* EMPTY */
+  }
 
   /**
    * @brief Construct a new Logger object with preset debug levels
@@ -81,9 +79,9 @@ class Logger {
   void DBG2(const char* module, const char* format, ...);
 
   /**
-   * @brief Use for high frequency debug messages, full debug with detailed output
-   * e.g. actual data being received by CAN, each state transtition condition evaluation
-   * DBG is printed iff debug_ >= 3
+   * @brief Use for high frequency debug messages, full debug with detailed
+   * output e.g. actual data being received by CAN, each state transtition
+   * condition evaluation DBG is printed iff debug_ >= 3
    */
   void DBG3(const char* module, const char* format, ...);
 
@@ -92,5 +90,6 @@ class Logger {
   int8_t debug_;
 };
 
-}}  // namespace hyped::utils
+}  // namespace utils
+}  // namespace hyped
 #endif  // BEAGLEBONE_BLACK_UTILS_LOGGER_HPP_

@@ -19,21 +19,20 @@
  */
 
 #include "motor_control/main.hpp"
-#include "utils/concurrent/thread.hpp"
 #include "state_machine/hyped-machine.hpp"
+#include "utils/concurrent/thread.hpp"
 
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
 
-using hyped::utils::concurrent::Thread;
+using hyped::state_machine::HypedMachine;
 using hyped::utils::Logger;
 using hyped::utils::System;
-using hyped::state_machine::HypedMachine;
+using hyped::utils::concurrent::Thread;
 
 using namespace hyped;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   System::parseArgs(argc, argv);
   System& sys = System::getSystem();
   Logger log_motor(sys.verbose_motor, sys.debug_motor);
@@ -41,7 +40,7 @@ int main(int argc, char* argv[])
 
   Logger log(true, 1);
   HypedMachine* hypedMachine = new HypedMachine(log);
-  Thread* motor  = new hyped::motor_control::Main(1, log);
+  Thread* motor = new hyped::motor_control::Main(1, log);
   motor->start();
 
   Thread::sleep(5000);

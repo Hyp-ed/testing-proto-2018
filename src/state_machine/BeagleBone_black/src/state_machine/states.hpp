@@ -4,9 +4,9 @@
  * Organisation: HYPED
  * Date: 11. February 2018
  * Description:
- * All states of the FSM implement interface defined by class State. The two functions
- * defined by this interface are:
- * entry() - to be called at entering new state
+ * All states of the FSM implement interface defined by class State. The two
+ * functions defined by this interface are: entry() - to be called at entering
+ * new state
  *         - stored the correct enum value of state_ variable
  * react() - changes current state based on event enum
  *
@@ -27,12 +27,12 @@
 #ifndef BEAGLEBONE_BLACK_STATE_MACHINE_STATES_HPP_
 #define BEAGLEBONE_BLACK_STATE_MACHINE_STATES_HPP_
 
-#include "state_machine/event.hpp"
 #include "data/data.hpp"
+#include "state_machine/event.hpp"
 #include "state_machine/hyped-machine.hpp"
+#include "utils/io/gpio.hpp"
 #include "utils/logger.hpp"
 #include "utils/system.hpp"
-#include "utils/io/gpio.hpp"
 
 namespace hyped {
 
@@ -44,13 +44,12 @@ class HypedMachine;
 
 class State {
  public:
-  State()
-    : state_(data::State::kInvalid) {}
+  State() : state_(data::State::kInvalid) {}
 
   virtual void react(HypedMachine &machine, Event event) = 0;
   virtual void entry() = 0;
-  data::State   state_;
-  static State* alloc_;   // allocate all states here
+  data::State state_;
+  static State *alloc_;  // allocate all states here
 };
 
 class Idle : public State {

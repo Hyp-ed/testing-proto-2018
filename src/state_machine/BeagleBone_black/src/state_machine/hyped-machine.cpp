@@ -25,29 +25,26 @@ namespace hyped {
 namespace state_machine {
 
 GPIO* HypedMachine::pin_embrake_ = nullptr;
-GPIO* HypedMachine::pin_water_   = nullptr;
+GPIO* HypedMachine::pin_water_ = nullptr;
 
 HypedMachine::HypedMachine(utils::Logger& log)
-    : current_state_(State::alloc_)
-    , log_(log)
-{
+    : current_state_(State::alloc_), log_(log) {
   log_.INFO("STATE", "State Machine initialised");
-  transition(new(current_state_) Idle());
+  transition(new (current_state_) Idle());
 }
 
-void HypedMachine::handleEvent(Event event)
-{
+void HypedMachine::handleEvent(Event event) {
   log_.DBG1("STATE", "Raised event %d", event);
   current_state_->react(*this, event);
 }
 
-void HypedMachine::transition(State *state)
-{
+void HypedMachine::transition(State* state) {
   // NOTE, no use of argument state, as all react() functions allocate all new
-  // states directly to current_state_ variable through common State::alloc_ pointer
+  // states directly to current_state_ variable through common State::alloc_
+  // pointer
   current_state_->entry();
-  log_.INFO("STATE", "Transitioned to %s"
-    , data::states[current_state_->state_]);
+  log_.INFO("STATE", "Transitioned to %s",
+            data::states[current_state_->state_]);
   state_machine_.current_state = current_state_->state_;
 
   // update shared data structure
@@ -55,22 +52,19 @@ void HypedMachine::transition(State *state)
   d.setStateMachineData(state_machine_);
 }
 
-void HypedMachine::reset()
-{
+void HypedMachine::reset() {
   log_.INFO("STATE", "State Machine resetted");
-  transition(new(current_state_) Idle());
+  transition(new (current_state_) Idle());
 }
 
-void HypedMachine::setupEmbrakes()
-{
+void HypedMachine::setupEmbrakes() {
   pin_embrake_ = new GPIO(46, utils::io::gpio::Direction::kOut);
-  pin_water_   = new GPIO(47, utils::io::gpio::Direction::kOut);
+  pin_water_ = new GPIO(47, utils::io::gpio::Direction::kOut);
   pin_embrake_->set();
   pin_water_->set();
 }
 
-void HypedMachine::engageEmbrakes()
-{
+void HypedMachine::engageEmbrakes() {
   utils::Logger log(true, 0);
   if (pin_embrake_) {
     pin_embrake_->clear();
@@ -80,4 +74,5 @@ void HypedMachine::engageEmbrakes()
   }
 }
 
-}}   // namespace hyped::state_machine
+}  // namespace state_machine
+}  // namespace hyped

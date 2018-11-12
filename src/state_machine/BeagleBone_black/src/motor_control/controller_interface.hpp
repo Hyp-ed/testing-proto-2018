@@ -2,7 +2,8 @@
  * Author: Sean Mullan
  * Organisation: HYPED
  * Date: 10/07/18
- * Description: Interface for controllers to enable use of real or fake controllers
+ * Description: Interface for controllers to enable use of real or fake
+ * controllers
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,21 +37,22 @@ enum ControllerState {
 };
 
 class ControllerInterface {
-  public:
-    virtual void registerController() = 0;
-    virtual void configure() = 0;
-    virtual void enterOperational() = 0;
-    virtual void enterPreOperational() = 0;
-    virtual void checkState() = 0;
-    virtual void sendTargetVelocity(int32_t target_velocity) = 0;
-    virtual void updateActualVelocity() = 0;
-    virtual int32_t getVelocity() = 0;
-    virtual void quickStop() = 0;
-    virtual void healthCheck() = 0;
-    virtual bool getFailure() = 0;
-    virtual ControllerState getControllerState() = 0;
+ public:
+  virtual void registerController() = 0;
+  virtual void configure() = 0;
+  virtual void enterOperational() = 0;
+  virtual void enterPreOperational() = 0;
+  virtual void checkState() = 0;
+  virtual void sendTargetVelocity(int32_t target_velocity) = 0;
+  virtual void updateActualVelocity() = 0;
+  virtual int32_t getVelocity() = 0;
+  virtual void quickStop() = 0;
+  virtual void healthCheck() = 0;
+  virtual bool getFailure() = 0;
+  virtual ControllerState getControllerState() = 0;
 };
 
-}}  // namespace hyped::motor_control
+}  // namespace motor_control
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_SENSORS_CONTROLLER_INTERFACE_HPP_

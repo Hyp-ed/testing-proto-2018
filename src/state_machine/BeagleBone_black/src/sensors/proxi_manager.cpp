@@ -21,34 +21,31 @@
 #ifdef PROXI
 #include "sensors/proxi_manager.hpp"
 
-#include "sensors/can_proxi.hpp"
-#include "sensors/vl6180.hpp"
 #include "data/data.hpp"
-#include "utils/timer.hpp"
-#include "utils/io/i2c.hpp"
+#include "sensors/can_proxi.hpp"
 #include "sensors/fake_proxi.hpp"
+#include "sensors/vl6180.hpp"
+#include "utils/io/i2c.hpp"
+#include "utils/timer.hpp"
 
 namespace hyped {
 
 using data::Data;
 using data::Sensors;
-using utils::System;
 using sensors::FakeProxi;
+using utils::System;
 using utils::io::I2C;
 using utils::math::OnlineStatistics;
 
-
 namespace sensors {
 
-ProxiManager::ProxiManager(Logger& log,
-                           bool is_front,
-                           ProxiManager::DataArray *proxi)
+ProxiManager::ProxiManager(Logger& log, bool is_front,
+                           ProxiManager::DataArray* proxi)
     : ProxiManagerInterface(log),
       sensors_proxi_(proxi),
       i2c_(I2C::getInstance()),
       is_front_(is_front),
-      is_calibrated_(false)
-{
+      is_calibrated_(false) {
   System& sys = System::getSystem();
   old_timestamp_ = utils::Timer::getTimeMicros();
   if (sys.fake_proxi || sys.fake_sensors) is_fake_ = true;
@@ -79,8 +76,7 @@ ProxiManager::ProxiManager(Logger& log,
   }
 }
 
-void ProxiManager::run()
-{
+void ProxiManager::run() {
   // collect calibration data
   uint32_t calib_counter = 0;
   Proximity proxi;
@@ -95,7 +91,7 @@ void ProxiManager::run()
     for (int i = 0; i < data::Sensors::kNumProximities; i++) {
       if (is_front_) {
         if (!i2c_.write(kMultiplexerAddr, 0x01 << i)) {
-          if (!is_fake_)log_.ERR("Proxi-Manager", "No Multiplexer connection");
+          if (!is_fake_) log_.ERR("Proxi-Manager", "No Multiplexer connection");
         }
       }
       proxi_[i]->getData(&proxi);
@@ -124,8 +120,7 @@ void ProxiManager::run()
   }
 }
 
-ProxiManager::CalibrationArray ProxiManager::getCalibrationData()
-{
+ProxiManager::CalibrationArray ProxiManager::getCalibrationData() {
   while (!is_calibrated_) {
     Thread::yield();
   }
@@ -135,17 +130,16 @@ ProxiManager::CalibrationArray ProxiManager::getCalibrationData()
   return proxi_calibration_;
 }
 
-bool ProxiManager::updated()
-{
+bool ProxiManager::updated() {
   if (old_timestamp_ != sensors_proxi_->timestamp) {
     return true;
   }
   return false;
 }
 
-void ProxiManager::resetTimestamp()
-{
+void ProxiManager::resetTimestamp() {
   old_timestamp_ = sensors_proxi_->timestamp;
 }
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped
 #endif

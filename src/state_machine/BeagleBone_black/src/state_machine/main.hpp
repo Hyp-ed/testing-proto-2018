@@ -3,9 +3,9 @@
  * Organisation: HYPED
  * Date: 11. March 2018
  * Description:
- * Main instantiates HypedMachine. It also monitors other data and generates Events
- * for the HypedMachine. Note, StateMachine structure in Data is not updated here but
- * in HypedMachine.
+ * Main instantiates HypedMachine. It also monitors other data and generates
+ * Events for the HypedMachine. Note, StateMachine structure in Data is not
+ * updated here but in HypedMachine.
  *
  *    Copyright 2018 HYPED
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,18 +25,18 @@
 #define BEAGLEBONE_BLACK_STATE_MACHINE_MAIN_HPP_
 
 #include <cstdint>
-#include "utils/concurrent/thread.hpp"
-#include "state_machine/hyped-machine.hpp"
 #include "data/data.hpp"
+#include "state_machine/hyped-machine.hpp"
+#include "utils/concurrent/thread.hpp"
 
 namespace hyped {
 
-using utils::concurrent::Thread;
 using utils::Logger;
+using utils::concurrent::Thread;
 
 namespace state_machine {
 
-class Main: public Thread {
+class Main : public Thread {
  public:
   explicit Main(uint8_t id, Logger& log);
   void run() override;
@@ -59,15 +59,16 @@ class Main: public Thread {
   uint64_t time_start_;
   uint64_t timeout_;
 
-  data::Data&           data_;
-  data::Communications  comms_data_;
-  data::Navigation      nav_data_;
-  data::StateMachine    sm_data_;
-  data::Motors          motor_data_;
-  data::Batteries       batteries_data_;
-  data::Sensors         sensors_data_;
+  data::Data& data_;
+  data::Communications comms_data_;
+  data::Navigation nav_data_;
+  data::StateMachine sm_data_;
+  data::Motors motor_data_;
+  data::Batteries batteries_data_;
+  data::Sensors sensors_data_;
 };
 
-}}  // namespace hyped::motor_control
+}  // namespace state_machine
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_STATE_MACHINE_MAIN_HPP_

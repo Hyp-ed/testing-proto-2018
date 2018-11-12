@@ -18,7 +18,6 @@
  *    limitations under the License.
  */
 
-
 #include "sensors/em_brake.hpp"
 #include "data/data.hpp"
 
@@ -36,14 +35,12 @@ EmBrake::EmBrake(Logger& log, bool is_front)
     : sys_(System::getSystem()),
       data_(data::Data::getInstance()),
       gpio_pin_(is_front ? 45 : 44, utils::io::gpio::kIn),
-      is_front_(is_front)
-{
+      is_front_(is_front) {
   em_data_.module_status = data::ModuleStatus::kInit;
   data_.setEmergencyBrakesData(em_data_);
 }
 
-void EmBrake::run()
-{
+void EmBrake::run() {
   int val;
   while (sys_.running_) {
     val = gpio_pin_.wait();
@@ -55,4 +52,5 @@ void EmBrake::run()
     data_.setEmergencyBrakesData(em_data_);
   }
 }
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped

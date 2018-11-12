@@ -21,16 +21,16 @@
 #ifndef BEAGLEBONE_BLACK_COMMUNICATIONS_RECEIVER_HPP_
 #define BEAGLEBONE_BLACK_COMMUNICATIONS_RECEIVER_HPP_
 
-#include "utils/concurrent/thread.hpp"
 #include "communications/communications.hpp"
 #include "data/data.hpp"
-#include "utils/system.hpp"
+#include "utils/concurrent/thread.hpp"
 #include "utils/logger.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 
-using utils::concurrent::Thread;
 using utils::Logger;
+using utils::concurrent::Thread;
 
 namespace communications {
 
@@ -39,14 +39,14 @@ class ReceiverThread : public Thread {
   explicit ReceiverThread(Logger& log, Communications* base_communicator);
   void run() override;
 
-
  private:
-  utils::System&  sys_;
-  Logger&         log_;
-  data::Data&     data_;
+  utils::System& sys_;
+  Logger& log_;
+  data::Data& data_;
   Communications* base_communicator_;
 };
 
-}}  //   namespace hyped::communications
+}  // namespace communications
+}  // namespace hyped
 
 #endif  // BEAGLEBONE_BLACK_COMMUNICATIONS_RECEIVER_HPP_

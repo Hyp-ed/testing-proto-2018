@@ -22,28 +22,23 @@
 #ifdef PROXI
 #include "sensors/can_proxi.hpp"
 
-
-#include "utils/system.hpp"
-#include "utils/math/statistics.hpp"
 #include "utils/concurrent/thread.hpp"
+#include "utils/math/statistics.hpp"
+#include "utils/system.hpp"
 
 namespace hyped {
 
-using utils::math::OnlineStatistics;
 using utils::concurrent::Thread;
+using utils::math::OnlineStatistics;
 
 namespace sensors {
 
-
-bool    CanProxi::can_registered_ = false;
-bool    CanProxi::valid_[kNumProximities] = {};
+bool CanProxi::can_registered_ = false;
+bool CanProxi::valid_[kNumProximities] = {};
 uint8_t CanProxi::data_[kNumProximities] = {};
 static_assert(kNumProximities <= 8, "cannot use more than 8 proxies over CAN");
 
-CanProxi::CanProxi(uint8_t id, Logger& log)
-    : log_(log),
-      id_(id)
-{
+CanProxi::CanProxi(uint8_t id, Logger& log) : log_(log), id_(id) {
   if (!can_registered_) {
     for (auto& v : valid_) {
       v = false;
@@ -57,12 +52,8 @@ CanProxi::CanProxi(uint8_t id, Logger& log)
 // ---------------------------------------------------------------------
 // ProxiInterface
 // ---------------------------------------------------------------------
-bool CanProxi::isOnline()
-{
-  return valid_[id_];
-}
-void CanProxi::getData(Proximity* proxi)
-{
+bool CanProxi::isOnline() { return valid_[id_]; }
+void CanProxi::getData(Proximity* proxi) {
   proxi->val = data_[id_];
   proxi->operational = isOnline();
 }
@@ -72,21 +63,21 @@ void CanProxi::startRanging() {}
 // ---------------------------------------------------------------------
 // CanProcessor
 // ---------------------------------------------------------------------
-void CanProxi::processNewData(Frame& message)
-{
+void CanProxi::processNewData(Frame& message) {
   switch (message.id) {
-    case 0x45A: {   // echo reply
+    case 0x45A: {  // echo reply
       // TODO(anyone): verify reply has the correct values (for debugging)
       break;
     }
-    case 0x45B: {   // data message
-      uint8_t size = kNumProximities < message.len ? kNumProximities : message.len;
+    case 0x45B: {  // data message
+      uint8_t size =
+          kNumProximities < message.len ? kNumProximities : message.len;
       for (uint8_t i = 0; i < size; i++) {
         data_[i] = message.data[i];
       }
       break;
     }
-    case 0x45C: {   // proxi health status
+    case 0x45C: {  // proxi health status
       uint8_t is_online = message.data[0];
       for (uint8_t i = 0; i < kNumProximities; i++) {
         valid_[i] = is_online & (1 << i);
@@ -94,13 +85,13 @@ void CanProxi::processNewData(Frame& message)
       break;
     }
     default: {
-      log_.ERR("CanProxi", "received unsupported message with id %u", message.id);
+      log_.ERR("CanProxi", "received unsupported message with id %u",
+               message.id);
     }
   }
 }
 
-bool CanProxi::hasId(uint32_t id, bool extended)
-{
+bool CanProxi::hasId(uint32_t id, bool extended) {
   switch (id) {
     case 0x45A:
     case 0x45B:
@@ -111,6 +102,6 @@ bool CanProxi::hasId(uint32_t id, bool extended)
   }
 }
 
-
-}}  // namespace hyped::sensors
+}  // namespace sensors
+}  // namespace hyped
 #endif

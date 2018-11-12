@@ -18,22 +18,19 @@
  *    limitations under the License.
  */
 
-
+#include "data/data.hpp"
 #include "sensors/vl6180.hpp"
-#include "utils/logger.hpp"
-#include "utils/system.hpp"
 #include "utils/concurrent/thread.hpp"
 #include "utils/io/i2c.hpp"
-#include "data/data.hpp"
+#include "utils/logger.hpp"
+#include "utils/system.hpp"
 
 using hyped::sensors::VL6180;
 using hyped::utils::Logger;
-using hyped::utils::io::I2C;
 using hyped::utils::concurrent::Thread;
+using hyped::utils::io::I2C;
 
-
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   hyped::utils::System::parseArgs(argc, argv);
   I2C& i2c = I2C::getInstance();
   Logger log(true, 1);
@@ -42,15 +39,14 @@ int main(int argc, char* argv[])
 
   log.INFO("TEST-vl6180", "VL6180 instance successfully created");
 
-  for (int i=0; i< 500; i++) {
+  for (int i = 0; i < 500; i++) {
     hyped::data::Proximity data;
     proxi.getData(&data);
     log.INFO("TEST-vl6180", "Continuous Distance: %d", data.val);
-    log.INFO("Multiplexer-test", "operational: %s", data.operational ? "true" : "false");
+    log.INFO("Multiplexer-test", "operational: %s",
+             data.operational ? "true" : "false");
     Thread::sleep(10);
   }
 
-
-
- 	return 0;
+  return 0;
 }

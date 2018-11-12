@@ -20,8 +20,8 @@
 
 #include <unistd.h>
 
-#include <thread>
 #include <chrono>
+#include <thread>
 
 #include "utils/io/can.hpp"
 #include "utils/system.hpp"
@@ -29,15 +29,12 @@
 using hyped::utils::io::Can;
 using hyped::utils::io::can::Frame;
 
-
-inline void delay(int ms)
-{
+inline void delay(int ms) {
   // usleep(ms * 1000);
-  std::this_thread::sleep_for(std::chrono::microseconds(ms*1000));
+  std::this_thread::sleep_for(std::chrono::microseconds(ms * 1000));
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
   hyped::utils::System::parseArgs(argc, argv);
   Frame data = {14, false, 4, {1, 2, 3, 4, 5, 6, 7, 8}};
 
